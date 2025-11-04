@@ -289,7 +289,7 @@ const VideoFilters = ({
                 onClick={() => handleToggleFilter('programmingLanguage', lang)}
                 className="h-7 gap-1 text-xs"
               >
-                {Icon && <span className="flex-shrink-0">{Icon}</span>}
+                {Icon && <span className="shrink-0">{Icon}</span>}
                 {lang}
                 <X className="h-3 w-3" />
               </Button>
@@ -446,7 +446,7 @@ const VideoFilters = ({
                       className="h-3 w-3 lg:h-3.5 lg:w-3.5"
                       aria-hidden="true"
                     />
-                    {Icon && <span className="flex-shrink-0">{Icon}</span>}
+                    {Icon && <span className="shrink-0">{Icon}</span>}
                     <span className="truncate">{lang}</span>
                   </div>
                 );
@@ -529,7 +529,7 @@ const VideoFilters = ({
                     )}
                   >
                     {SortIcon && (
-                      <span className="flex-shrink-0" aria-hidden="true">
+                      <span className="shrink-0" aria-hidden="true">
                         {SortIcon}
                       </span>
                     )}

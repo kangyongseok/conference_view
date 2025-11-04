@@ -14,6 +14,7 @@ import { fetchFilterOptions } from '@/lib/supabase/queries';
 import Link from 'next/link';
 import { Star } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useAnalytics } from '../hooks/useAnalytics';
 
 export interface FilterState {
   year: string[];
@@ -24,6 +25,8 @@ export interface FilterState {
 }
 
 export default function Home() {
+  const { logFilterApply, logFullscreenEnter, logFullscreenExit } =
+    useAnalytics();
   const [filters, setFilters] = useState<FilterState>({
     year: [],
     conference: [],
@@ -98,6 +101,27 @@ export default function Home() {
     window.open(youtubeUrl, '_blank', 'noopener,noreferrer');
   };
 
+  // 필터 적용 로그
+  const handleFilterChange = (newFilters: FilterState) => {
+    setFilters(newFilters);
+    logFilterApply({
+      year: newFilters.year,
+      conference: newFilters.conference,
+      programmingLanguage: newFilters.programmingLanguage,
+      jobType: newFilters.jobType,
+      sortBy: newFilters.sortBy,
+    });
+  };
+
+  // 풀스크린 로그
+  useEffect(() => {
+    if (isFullscreen && selectedVideoId) {
+      logFullscreenEnter(selectedVideoId);
+    } else if (!isFullscreen && selectedVideoId) {
+      logFullscreenExit(selectedVideoId);
+    }
+  }, [isFullscreen, selectedVideoId, logFullscreenEnter, logFullscreenExit]);
+
   useEffect(() => {
     if (!selectedVideoId) {
       setIsFullscreen(false);
@@ -153,14 +177,14 @@ export default function Home() {
         </header>
 
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
-          <aside className="lg:sticky lg:top-4 lg:w-64 lg:flex-shrink-0 lg:self-start">
+          <aside className="lg:sticky lg:top-4 lg:w-64 lg:shrink-0 lg:self-start">
             <div className="sticky top-0 z-40 bg-background pb-4 lg:static lg:z-auto">
               <div className="mb-4 text-sm font-semibold lg:mb-2 lg:text-xs lg:uppercase lg:tracking-wider lg:text-muted-foreground">
                 필터
               </div>
               <VideoFilters
                 filters={filters}
-                onFilterChange={setFilters}
+                onFilterChange={handleFilterChange}
                 availableYears={filterOptions.years}
                 availableConferences={filterOptions.conferences}
                 availableLanguages={filterOptions.languages}
@@ -203,7 +227,7 @@ export default function Home() {
                       )}
                     </div>
                   </div>
-                  <div className="flex gap-1 flex-shrink-0">
+                  <div className="flex gap-1 shrink-0">
                     <Button
                       variant="ghost"
                       size="icon"
@@ -240,7 +264,7 @@ export default function Home() {
                       </p>
                     </div>
                   )}
-                  <div className="flex-shrink-0 sm:ml-4">
+                  <div className="shrink-0 sm:ml-4">
                     <Button
                       variant="outline"
                       onClick={handleOpenYouTube}

@@ -11,8 +11,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useAnalytics } from '../hooks/useAnalytics';
 
 export const AuthButton = () => {
+  const { logLogout } = useAnalytics();
   const { user, loading, signInWithGoogle, signOut } = useAuth();
 
   const handleSignIn = async () => {
@@ -26,6 +28,7 @@ export const AuthButton = () => {
   const handleSignOut = async () => {
     try {
       await signOut();
+      logLogout();
     } catch (error) {
       console.error('로그아웃 오류:', error);
     }

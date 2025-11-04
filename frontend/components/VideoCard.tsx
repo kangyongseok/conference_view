@@ -6,8 +6,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import VideoPlayer from '@/components/VideoPlayer';
 import { Button } from '@/components/ui/button';
 import FavoriteButton from '@/components/FavoriteButton';
-import { ExternalLink, X, Maximize2 } from 'lucide-react';
+import { ExternalLink, X, Maximize2, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAnalytics } from '../hooks/useAnalytics';
+import { useFavorites } from '@/contexts/FavoritesContext';
 
 interface VideoCardProps {
   youtubeId: string;
@@ -45,12 +47,16 @@ const VideoCard = ({
   isSelected = false,
 }: VideoCardProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
+  const { logVideoPlayStart, logVideoOpenYouTube } = useAnalytics();
+  const { isFavorite } = useFavorites();
+  const isFavorited = isFavorite(youtubeId);
 
   const handleClick = () => {
     if (onVideoSelect) {
       onVideoSelect(youtubeId);
     }
     setIsPlaying(true);
+    logVideoPlayStart(youtubeId, title);
   };
 
   const handleClose = (e: React.MouseEvent) => {
@@ -65,6 +71,7 @@ const VideoCard = ({
     e.stopPropagation();
     const url = videoUrl || `https://www.youtube.com/watch?v=${youtubeId}`;
     window.open(url, '_blank', 'noopener,noreferrer');
+    logVideoOpenYouTube(youtubeId);
   };
 
   return (
@@ -74,6 +81,7 @@ const VideoCard = ({
         isSelected || isPlaying
           ? 'ring-2 ring-primary ring-offset-2'
           : 'cursor-pointer',
+        isFavorited && 'ring-1 ring-yellow-500/50', // 즐겨찾기된 영상에 테두리 추가
         className
       )}
       onClick={!isPlaying ? handleClick : undefined}
@@ -125,8 +133,26 @@ const VideoCard = ({
               className="object-cover transition-transform group-hover:scale-105"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
-            {/* 즐겨찾기 버튼 */}
-            <div className="absolute top-2 right-2 opacity-0 transition-opacity group-hover:opacity-100">
+            {/* 즐겨찾기 뱃지 (좌상단) */}
+            {isFavorited && (
+              <div className="absolute top-2 left-2 z-10">
+                <div className="flex items-center gap-1 rounded-full bg-yellow-500/90 px-2 py-1 shadow-md backdrop-blur-sm">
+                  <Star className="h-3 w-3 fill-white text-white" />
+                  <span className="text-xs font-semibold text-white">
+                    즐겨찾기
+                  </span>
+                </div>
+              </div>
+            )}
+            {/* 즐겨찾기 버튼 - 즐겨찾기된 영상은 항상 표시, 아니면 hover 시 표시 */}
+            <div
+              className={cn(
+                'absolute top-2 right-2 transition-opacity',
+                isFavorited
+                  ? 'opacity-100 z-10'
+                  : 'opacity-0 group-hover:opacity-100'
+              )}
+            >
               <FavoriteButton youtubeId={youtubeId} size="sm" />
             </div>
           </>
@@ -134,9 +160,15 @@ const VideoCard = ({
       </div>
 
       <CardContent className="p-4">
-        {/* 타이틀 */}
-        <h3 className="mb-2 line-clamp-2 text-base font-semibold leading-tight">
-          {title}
+        {/* 타이틀 - 즐겨찾기된 영상은 별 아이콘 표시 */}
+        <h3 className="mb-2 line-clamp-2 text-base font-semibold leading-tight flex items-start gap-1.5">
+          {isFavorited && (
+            <Star
+              className="h-4 w-4 shrink-0 mt-0.5 fill-yellow-500 text-yellow-500"
+              aria-label="즐겨찾기됨"
+            />
+          )}
+          <span className="flex-1">{title}</span>
         </h3>
 
         {/* 컨퍼런스명 */}

@@ -4,6 +4,7 @@ import './globals.css';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { AuthProvider } from '../contexts/AuthContext';
 import { FavoritesProvider } from '@/contexts/FavoritesContext';
+import { GoogleAnalytics } from '../components/GoogleAnalytics';
 
 const notoSansKR = Noto_Sans_KR({
   variable: '--font-noto-sans-kr',
@@ -87,6 +88,7 @@ export default function RootLayout({
         <meta name="theme-color" content="#000000" />
       </head>
       <body className={`${notoSansKR.variable} ${outfit.variable} antialiased`}>
+        <GoogleAnalytics />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

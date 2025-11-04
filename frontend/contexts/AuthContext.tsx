@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import type { User, Session } from '@supabase/supabase-js';
+import { event } from '@/lib/analytics/gtag';
 
 interface AuthContextType {
   user: User | null;
@@ -38,8 +39,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
-      setUser(session?.user ?? null);
+      const newUser = session?.user ?? null;
+      setUser(newUser);
       setLoading(false);
+
+      // 로그인 이벤트 로그 (직접 event 함수 호출)
+      if (_event === 'SIGNED_IN' && newUser) {
+        event({
+          action: 'login',
+          category: 'Auth',
+          label: 'google',
+          login_method: 'google',
+          user_id: newUser.id,
+        });
+      }
     });
 
     return () => {

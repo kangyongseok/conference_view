@@ -6,6 +6,7 @@ import { Heart } from 'lucide-react';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
+import { useAnalytics } from '../hooks/useAnalytics';
 
 interface FavoriteButtonProps {
   youtubeId: string;
@@ -23,6 +24,7 @@ const FavoriteButton = ({
   const { user } = useAuth();
   const { isFavorite, toggleFavorite, isLoading } = useFavorites();
   const [isToggling, setIsToggling] = useState(false);
+  const { logFavoriteAdd, logFavoriteRemove } = useAnalytics();
 
   const favorite = isFavorite(youtubeId);
 
@@ -32,10 +34,16 @@ const FavoriteButton = ({
       alert('로그인이 필요합니다.');
       return;
     }
-
     setIsToggling(true);
     try {
+      const wasFavorite = isFavorite(youtubeId);
       await toggleFavorite(youtubeId);
+
+      if (wasFavorite) {
+        logFavoriteRemove(youtubeId);
+      } else {
+        logFavoriteAdd(youtubeId);
+      }
     } finally {
       setIsToggling(false);
     }
