@@ -56,9 +56,9 @@ const applyFilters = (query: any, filters: FilterOptions) => {
     filteredQuery = filteredQuery.in('year', years);
   }
 
-  // 컨퍼런스 필터
+  // 컨퍼런스 필터 - channel_name 사용
   if (filters.conference && filters.conference.length > 0) {
-    filteredQuery = filteredQuery.in('conference_name', filters.conference);
+    filteredQuery = filteredQuery.in('channel_name', filters.conference); // 👈 conference_name → channel_name 변경
   }
 
   // 개발언어 필터 (배열 포함 검색)
@@ -143,7 +143,7 @@ export const fetchVideos = async (
   return result;
 };
 
-// 필터 옵션 조회 - 캐싱 적용 (더 긴 TTL)
+// 필터 옵션 조회 - 별도 테이블에서 조회
 export const fetchFilterOptions = async (): Promise<{
   years: string[];
   conferences: string[];
@@ -166,65 +166,41 @@ export const fetchFilterOptions = async (): Promise<{
   // 캐시 미스 - 실제 쿼리 실행
   const supabase = createClient();
 
-  // 연도 목록
-  const { data: yearData } = await supabase
-    .from('videos')
-    .select('year')
-    .not('year', 'is', null);
+  // 필터 옵션 테이블에서 조회
+  const { data: filterOptions, error } = await supabase
+    .from('filter_options')
+    .select('type, value, display_order')
+    .eq('is_active', true)
+    .order('display_order', { ascending: true })
+    .order('value', { ascending: true });
 
-  // 컨퍼런스 목록
-  const { data: conferenceData } = await supabase
-    .from('videos')
-    .select('conference_name')
-    .not('conference_name', 'is', null);
+  if (error) {
+    console.error('필터 옵션 조회 오류:', error);
+    throw error;
+  }
 
-  // 개발언어 목록 (배열에서 추출)
-  const { data: languageData } = await supabase
-    .from('videos')
-    .select('programming_languages')
-    .not('programming_languages', 'is', null);
+  // 타입별로 분류
+  const years: string[] = [];
+  const conferences: string[] = [];
+  const languages: string[] = [];
+  const jobTypes: string[] = [];
 
-  // 직군 목록
-  const { data: jobTypeData } = await supabase
-    .from('videos')
-    .select('job_type')
-    .not('job_type', 'is', null);
-
-  // 연도 정렬 및 중복 제거
-  const years = Array.from(
-    new Set(
-      (yearData || [])
-        .map((v) => v.year?.toString())
-        .filter((y): y is string => y !== undefined)
-    )
-  ).sort((a, b) => parseInt(b) - parseInt(a));
-
-  // 컨퍼런스 정렬 및 중복 제거
-  const conferences = Array.from(
-    new Set(
-      (conferenceData || [])
-        .map((v) => v.conference_name)
-        .filter((c): c is string => c !== null)
-    )
-  ).sort();
-
-  // 개발언어 정렬 및 중복 제거 (배열 평탄화)
-  const languages = Array.from(
-    new Set(
-      (languageData || [])
-        .flatMap((v) => v.programming_languages || [])
-        .filter((l): l is string => l !== null && l !== undefined)
-    )
-  ).sort();
-
-  // 직군 정렬 및 중복 제거
-  const jobTypes = Array.from(
-    new Set(
-      (jobTypeData || [])
-        .map((v) => v.job_type)
-        .filter((j): j is string => j !== null)
-    )
-  ).sort();
+  (filterOptions || []).forEach((option) => {
+    switch (option.type) {
+      case 'year':
+        years.push(option.value);
+        break;
+      case 'conference':
+        conferences.push(option.value);
+        break;
+      case 'programming_language':
+        languages.push(option.value);
+        break;
+      case 'job_type':
+        jobTypes.push(option.value);
+        break;
+    }
+  });
 
   const result = {
     years,
@@ -233,10 +209,203 @@ export const fetchFilterOptions = async (): Promise<{
     jobTypes,
   };
 
-  // 캐시 저장 (30분 TTL - 필터 옵션은 자주 변경되지 않음)
+  // 캐시 저장 (30분 TTL)
   cache.set(cacheKey, result, 30 * 60 * 1000);
 
   return result;
+};
+
+// 필터 옵션 추가 (관리자용)
+export const addFilterOption = async (
+  type: 'conference' | 'programming_language' | 'job_type' | 'year',
+  value: string,
+  displayOrder: number = 0
+): Promise<void> => {
+  const supabase = createClient();
+  const { error } = await supabase.from('filter_options').insert([
+    {
+      type,
+      value,
+      display_order: displayOrder,
+      is_active: true,
+    },
+  ]);
+
+  if (error) {
+    console.error('필터 옵션 추가 오류:', error);
+    throw error;
+  }
+
+  // 캐시 무효화
+  cache.delete('filterOptions');
+};
+
+// 필터 옵션 삭제 (관리자용)
+export const deleteFilterOption = async (
+  type: 'conference' | 'programming_language' | 'job_type' | 'year',
+  value: string
+): Promise<void> => {
+  const supabase = createClient();
+  const { error } = await supabase
+    .from('filter_options')
+    .delete()
+    .eq('type', type)
+    .eq('value', value);
+
+  if (error) {
+    console.error('필터 옵션 삭제 오류:', error);
+    throw error;
+  }
+
+  // 캐시 무효화
+  cache.delete('filterOptions');
+};
+
+// 필터 옵션 업데이트 (관리자용)
+export const updateFilterOption = async (
+  type: 'conference' | 'programming_language' | 'job_type' | 'year',
+  oldValue: string,
+  newValue: string,
+  displayOrder?: number,
+  isActive?: boolean
+): Promise<void> => {
+  const supabase = createClient();
+  const updateData: any = { value: newValue };
+
+  if (displayOrder !== undefined) {
+    updateData.display_order = displayOrder;
+  }
+
+  if (isActive !== undefined) {
+    updateData.is_active = isActive;
+  }
+
+  const { error } = await supabase
+    .from('filter_options')
+    .update(updateData)
+    .eq('type', type)
+    .eq('value', oldValue);
+
+  if (error) {
+    console.error('필터 옵션 업데이트 오류:', error);
+    throw error;
+  }
+
+  // 캐시 무효화
+  cache.delete('filterOptions');
+};
+
+// 필터 옵션 동기화 (videos 테이블에서 최신 데이터로 업데이트)
+export const syncFilterOptionsFromVideos = async (): Promise<void> => {
+  const supabase = createClient();
+
+  // 컨퍼런스 동기화
+  const { data: conferenceData } = await supabase
+    .from('videos')
+    .select('conference_name, channel_name');
+
+  const conferences = Array.from(
+    new Set(
+      (conferenceData || [])
+        .map((v) => v.conference_name || v.channel_name)
+        .filter((c): c is string => c !== null && c !== undefined)
+    )
+  );
+
+  // 기존 데이터 삭제 후 재삽입
+  await supabase.from('filter_options').delete().eq('type', 'conference');
+
+  await supabase.from('filter_options').insert(
+    conferences.map((conf) => ({
+      type: 'conference',
+      value: conf,
+      display_order: 0,
+      is_active: true,
+    }))
+  );
+
+  // 연도 동기화
+  const { data: yearData } = await supabase
+    .from('videos')
+    .select('year')
+    .not('year', 'is', null);
+
+  const years = Array.from(
+    new Set(
+      (yearData || [])
+        .map((v) => v.year?.toString())
+        .filter((y): y is string => y !== undefined)
+    )
+  )
+    .map((y) => parseInt(y))
+    .sort((a, b) => b - a);
+
+  await supabase.from('filter_options').delete().eq('type', 'year');
+
+  await supabase.from('filter_options').insert(
+    years.map((year, index) => ({
+      type: 'year',
+      value: year.toString(),
+      display_order: index + 1,
+      is_active: true,
+    }))
+  );
+
+  // 개발언어 동기화
+  const { data: languageData } = await supabase
+    .from('videos')
+    .select('programming_languages')
+    .not('programming_languages', 'is', null);
+
+  const languages = Array.from(
+    new Set(
+      (languageData || [])
+        .flatMap((v) => v.programming_languages || [])
+        .filter((l): l is string => l !== null && l !== undefined)
+    )
+  ).sort();
+
+  await supabase
+    .from('filter_options')
+    .delete()
+    .eq('type', 'programming_language');
+
+  await supabase.from('filter_options').insert(
+    languages.map((lang) => ({
+      type: 'programming_language',
+      value: lang,
+      display_order: 0,
+      is_active: true,
+    }))
+  );
+
+  // 직군 동기화
+  const { data: jobTypeData } = await supabase
+    .from('videos')
+    .select('job_type')
+    .not('job_type', 'is', null);
+
+  const jobTypes = Array.from(
+    new Set(
+      (jobTypeData || [])
+        .map((v) => v.job_type)
+        .filter((j): j is string => j !== null)
+    )
+  ).sort();
+
+  await supabase.from('filter_options').delete().eq('type', 'job_type');
+
+  await supabase.from('filter_options').insert(
+    jobTypes.map((jobType) => ({
+      type: 'job_type',
+      value: jobType,
+      display_order: 0,
+      is_active: true,
+    }))
+  );
+
+  // 캐시 무효화
+  cache.delete('filterOptions');
 };
 
 // 단일 비디오 조회 - 캐싱 적용

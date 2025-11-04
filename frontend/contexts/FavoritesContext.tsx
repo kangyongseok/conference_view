@@ -12,8 +12,6 @@ import {
   addFavorite,
   removeFavorite,
   fetchUserFavorites,
-  checkIsFavorite,
-  type Favorite,
 } from '@/lib/supabase/queries';
 import { invalidateFavoriteCache } from '@/lib/supabase/queries';
 
