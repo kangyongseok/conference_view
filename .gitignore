@@ -1,0 +1,15 @@
+.env
+.env.*
+node_modules
+.DS_Store
+.next/
+out/
+.eslintcache
+tailwind.config.js
+postcss.config.js
+yarn-error.log
+npm-debug.log
+public/static/
+/coverage/
+*.local
+*.log
