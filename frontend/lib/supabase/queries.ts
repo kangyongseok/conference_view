@@ -1,4 +1,7 @@
+'use client';
+
 import { createClient } from './client';
+import { cache } from '@/lib/cache/cache';
 // import type { PostgrestFilterBuilder } from '@supabase/supabase-js';
 
 export interface Video {
@@ -97,23 +100,31 @@ const applySorting = (query: any, sortBy: FilterOptions['sortBy']) => {
   }
 };
 
-// 비디오 목록 조회 (페이지네이션)
+// 비디오 목록 조회 (페이지네이션) - 캐싱 적용
 export const fetchVideos = async (
   filters: FilterOptions = {},
   pagination: PaginationOptions = { page: 1, pageSize: 20 }
 ): Promise<{ data: Video[]; total: number }> => {
+  // 캐시 키 생성
+  const cacheKey = cache.generateKey('videos', { filters, pagination });
+
+  // 캐시 확인
+  const cached = cache.get<{ data: Video[]; total: number }>(cacheKey);
+  if (cached) {
+    return cached;
+  }
+
+  // 캐시 미스 - 실제 쿼리 실행
   const supabase = createClient();
   const { page, pageSize } = pagination;
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
-  // 필터 적용
   let query = supabase.from('videos').select('*', { count: 'exact' });
 
   query = applyFilters(query, filters);
   query = applySorting(query, filters.sortBy || 'newest');
 
-  // 페이지네이션
   const { data, error, count } = await query.range(from, to);
 
   if (error) {
@@ -121,19 +132,38 @@ export const fetchVideos = async (
     throw error;
   }
 
-  return {
+  const result = {
     data: data || [],
     total: count || 0,
   };
+
+  // 캐시 저장 (5분 TTL)
+  cache.set(cacheKey, result, 5 * 60 * 1000);
+
+  return result;
 };
 
-// 필터 옵션 조회 (동적 필터 목록)
+// 필터 옵션 조회 - 캐싱 적용 (더 긴 TTL)
 export const fetchFilterOptions = async (): Promise<{
   years: string[];
   conferences: string[];
   languages: string[];
   jobTypes: string[];
 }> => {
+  const cacheKey = 'filterOptions';
+
+  // 캐시 확인
+  const cached = cache.get<{
+    years: string[];
+    conferences: string[];
+    languages: string[];
+    jobTypes: string[];
+  }>(cacheKey);
+  if (cached) {
+    return cached;
+  }
+
+  // 캐시 미스 - 실제 쿼리 실행
   const supabase = createClient();
 
   // 연도 목록
@@ -196,20 +226,31 @@ export const fetchFilterOptions = async (): Promise<{
     )
   ).sort();
 
-  return {
+  const result = {
     years,
     conferences,
     languages,
     jobTypes,
   };
+
+  // 캐시 저장 (30분 TTL - 필터 옵션은 자주 변경되지 않음)
+  cache.set(cacheKey, result, 30 * 60 * 1000);
+
+  return result;
 };
 
-// 단일 비디오 조회
+// 단일 비디오 조회 - 캐싱 적용
 export const fetchVideoById = async (
   youtubeId: string
 ): Promise<Video | null> => {
-  const supabase = createClient();
+  const cacheKey = cache.generateKey('video', { youtubeId });
 
+  const cached = cache.get<Video>(cacheKey);
+  if (cached) {
+    return cached;
+  }
+
+  const supabase = createClient();
   const { data, error } = await supabase
     .from('videos')
     .select('*')
@@ -219,6 +260,11 @@ export const fetchVideoById = async (
   if (error) {
     console.error('비디오 조회 오류:', error);
     return null;
+  }
+
+  // 캐시 저장 (10분 TTL)
+  if (data) {
+    cache.set(cacheKey, data, 10 * 60 * 1000);
   }
 
   return data;
@@ -310,22 +356,32 @@ export const checkIsFavorite = async (
   return !!data;
 };
 
-// 즐겨찾기한 비디오 목록 조회 (페이지네이션)
+// 즐겨찾기한 비디오 목록 조회 - 캐싱 적용 (짧은 TTL, 사용자별)
 export const fetchFavoriteVideos = async (
   userId: string,
   filters: FilterOptions = {},
   pagination: PaginationOptions = { page: 1, pageSize: 20 }
 ): Promise<{ data: Video[]; total: number }> => {
+  // 사용자별 캐시 키
+  const cacheKey = cache.generateKey(`favorites:${userId}`, {
+    filters,
+    pagination,
+  });
+
+  const cached = cache.get<{ data: Video[]; total: number }>(cacheKey);
+  if (cached) {
+    return cached;
+  }
+
   const supabase = createClient();
   const { page, pageSize } = pagination;
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
-  // 즐겨찾기 목록 조회 - 현재 사용자의 즐겨찾기만
   const { data: favorites, error: favoritesError } = await supabase
     .from('favorites')
     .select('youtube_id')
-    .eq('user_id', userId); // 현재 로그인한 사용자 ID로 필터링
+    .eq('user_id', userId);
 
   if (favoritesError) {
     console.error('즐겨찾기 조회 오류:', favoritesError);
@@ -338,7 +394,6 @@ export const fetchFavoriteVideos = async (
 
   const youtubeIds = favorites.map((f) => f.youtube_id);
 
-  // 비디오 조회 - 즐겨찾기한 youtube_id만
   let query = supabase
     .from('videos')
     .select('*', { count: 'exact' })
@@ -354,8 +409,18 @@ export const fetchFavoriteVideos = async (
     throw error;
   }
 
-  return {
+  const result = {
     data: data || [],
     total: count || 0,
   };
+
+  // 캐시 저장 (2분 TTL - 즐겨찾기는 자주 변경될 수 있음)
+  cache.set(cacheKey, result, 2 * 60 * 1000);
+
+  return result;
+};
+
+// 즐겨찾기 추가/제거 시 캐시 무효화 함수
+export const invalidateFavoriteCache = (userId: string): void => {
+  cache.clearByPrefix(`favorites:${userId}`);
 };

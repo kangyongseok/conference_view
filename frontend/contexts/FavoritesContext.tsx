@@ -15,6 +15,7 @@ import {
   checkIsFavorite,
   type Favorite,
 } from '@/lib/supabase/queries';
+import { invalidateFavoriteCache } from '@/lib/supabase/queries';
 
 interface FavoritesContextType {
   favorites: string[]; // youtube_id 배열
@@ -72,6 +73,9 @@ export const FavoritesProvider = ({ children }: { children: ReactNode }) => {
         await addFavorite(user.id, youtubeId);
         setFavorites([...favorites, youtubeId]);
       }
+
+      // 즐겨찾기 캐시 무효화
+      invalidateFavoriteCache(user.id);
     } catch (error) {
       console.error('Error toggling favorite:', error);
       alert('즐겨찾기 처리 중 오류가 발생했습니다.');
