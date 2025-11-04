@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
 import VideoPlayer from '@/components/VideoPlayer';
@@ -51,12 +51,20 @@ const VideoCard = ({
   const { isFavorite } = useFavorites();
   const isFavorited = isFavorite(youtubeId);
 
+  // isSelected가 변경되면 재생 상태 동기화
+  useEffect(() => {
+    if (isSelected) {
+      setIsPlaying(true);
+      logVideoPlayStart(youtubeId, title);
+    } else {
+      setIsPlaying(false);
+    }
+  }, [isSelected, youtubeId, title, logVideoPlayStart]);
+
   const handleClick = () => {
     if (onVideoSelect) {
       onVideoSelect(youtubeId);
     }
-    setIsPlaying(true);
-    logVideoPlayStart(youtubeId, title);
   };
 
   const handleClose = (e: React.MouseEvent) => {
@@ -81,7 +89,7 @@ const VideoCard = ({
         isSelected || isPlaying
           ? 'ring-2 ring-primary ring-offset-2'
           : 'cursor-pointer',
-        isFavorited && 'ring-1 ring-yellow-500/50', // 즐겨찾기된 영상에 테두리 추가
+        isFavorited && 'ring-1 ring-yellow-500/50',
         className
       )}
       onClick={!isPlaying ? handleClick : undefined}
@@ -97,6 +105,21 @@ const VideoCard = ({
                 autoplay={true}
                 title={title}
               />
+            </div>
+            {/* 즐겨찾기 뱃지 (좌상단) - 재생 중에도 표시 */}
+            {isFavorited && (
+              <div className="absolute top-2 left-2 z-10">
+                <div className="flex items-center gap-1 rounded-full bg-yellow-500/90 px-2 py-1 shadow-md backdrop-blur-sm">
+                  <Star className="h-3 w-3 fill-white text-white" />
+                  <span className="text-xs font-semibold text-white">
+                    즐겨찾기
+                  </span>
+                </div>
+              </div>
+            )}
+            {/* 즐겨찾기 버튼 - 재생 중에도 표시 (좌하단) */}
+            <div className="absolute bottom-2 left-2 z-10">
+              <FavoriteButton youtubeId={youtubeId} size="sm" />
             </div>
             {/* 닫기 버튼 */}
             <div className="absolute top-2 right-2 z-10">
@@ -144,15 +167,8 @@ const VideoCard = ({
                 </div>
               </div>
             )}
-            {/* 즐겨찾기 버튼 - 즐겨찾기된 영상은 항상 표시, 아니면 hover 시 표시 */}
-            <div
-              className={cn(
-                'absolute top-2 right-2 transition-opacity',
-                isFavorited
-                  ? 'opacity-100 z-10'
-                  : 'opacity-0 group-hover:opacity-100'
-              )}
-            >
+            {/* 즐겨찾기 버튼 - 항상 표시 */}
+            <div className="absolute top-2 right-2 z-10 opacity-100">
               <FavoriteButton youtubeId={youtubeId} size="sm" />
             </div>
           </>

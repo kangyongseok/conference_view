@@ -177,8 +177,8 @@ export default function Home() {
         </header>
 
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
-          <aside className="lg:sticky lg:top-4 lg:w-64 lg:shrink-0 lg:self-start">
-            <div className="sticky top-0 z-40 bg-background pb-4 lg:static lg:z-auto">
+          <aside className="sticky top-0 z-40 lg:sticky lg:top-4 lg:w-64 lg:shrink-0 lg:self-start">
+            <div className="bg-background pb-4 lg:static lg:z-auto lg:bg-transparent">
               <div className="mb-4 text-sm font-semibold lg:mb-2 lg:text-xs lg:uppercase lg:tracking-wider lg:text-muted-foreground">
                 필터
               </div>
