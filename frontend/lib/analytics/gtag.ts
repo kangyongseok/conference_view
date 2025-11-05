@@ -4,6 +4,8 @@
 export const GA_MEASUREMENT_ID =
   process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || '';
 
+const isDevelopment = process.env.NODE_ENV === 'development';
+
 // gtag 함수 타입 정의
 declare global {
   interface Window {
@@ -18,6 +20,7 @@ declare global {
 
 // 페이지뷰 추적
 export const pageview = (url: string): void => {
+  if (isDevelopment) return;
   if (typeof window !== 'undefined' && window.gtag) {
     window.gtag('config', GA_MEASUREMENT_ID, {
       page_path: url,
@@ -39,6 +42,7 @@ export const event = ({
   value?: number;
   [key: string]: any;
 }): void => {
+  if (isDevelopment) return;
   if (typeof window !== 'undefined' && window.gtag) {
     window.gtag('event', action, {
       event_category: category,

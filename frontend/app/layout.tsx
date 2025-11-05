@@ -81,6 +81,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+  const isDevelopment = process.env.NODE_ENV === 'development';
 
   return (
     <html lang="ko" suppressHydrationWarning>
@@ -89,7 +90,7 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#000000" />
         {/* Google Analytics */}
-        {GA_MEASUREMENT_ID && (
+        {GA_MEASUREMENT_ID && !isDevelopment && (
           <>
             <Script
               strategy="afterInteractive"

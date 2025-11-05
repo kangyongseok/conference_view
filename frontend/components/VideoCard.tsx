@@ -7,7 +7,7 @@ import VideoPlayer from '@/components/VideoPlayer';
 import { Button } from '@/components/ui/button';
 import FavoriteButton from '@/components/FavoriteButton';
 import { ExternalLink, X, Maximize2, Star, FileText } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, getConferenceColor } from '@/lib/utils';
 import { useAnalytics } from '../hooks/useAnalytics';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import { VideoNotePanel } from '@/components/VideoNotePanel';
@@ -240,7 +240,14 @@ const VideoCard = ({
 
         {/* 컨퍼런스명 */}
         {conferenceName && (
-          <p className="mb-1 text-sm font-medium text-primary">
+          <p
+            className="mb-1 text-sm font-medium"
+            style={
+              getConferenceColor(conferenceName)
+                ? { color: getConferenceColor(conferenceName) }
+                : {}
+            }
+          >
             {conferenceName}
           </p>
         )}

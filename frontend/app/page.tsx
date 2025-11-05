@@ -14,7 +14,7 @@ import {
   Loader2,
   FileText,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, getConferenceColor } from '@/lib/utils';
 import { AuthButton } from '@/components/AuthButton';
 import { useInfiniteVideos } from '@/hooks/useInfiniteVideos';
 import { fetchFilterOptions } from '@/lib/supabase/queries';
@@ -91,10 +91,14 @@ export default function Home() {
   }, [selectedVideoId, videos]);
 
   const handleVideoSelect = (youtubeId: string) => {
-    if (selectedVideoId === youtubeId) {
+    if (selectedVideoId === youtubeId && isFullscreen) {
+      // 같은 비디오를 클릭하고 전체보기 모드일 때는 닫기
       setSelectedVideoId('');
+      setIsFullscreen(false);
     } else {
+      // 새로운 비디오를 선택하면 바로 전체보기 모드로
       setSelectedVideoId(youtubeId);
+      setIsFullscreen(true);
     }
   };
 
@@ -188,7 +192,7 @@ export default function Home() {
         <div
           className={cn(
             'flex-1 overflow-y-auto transition-all duration-300',
-            isNoteOpen && 'mr-96'
+            isNoteOpen && !isFullscreen && 'mr-96'
           )}
         >
           <div className="container mx-auto p-4 lg:p-6">
@@ -258,7 +262,20 @@ export default function Home() {
                           </h2>
                           <div className="flex flex-wrap items-center gap-3 text-sm">
                             {selectedVideoData.conference_name && (
-                              <span className="font-medium text-primary">
+                              <span
+                                className="font-medium"
+                                style={
+                                  getConferenceColor(
+                                    selectedVideoData.conference_name
+                                  )
+                                    ? {
+                                        color: getConferenceColor(
+                                          selectedVideoData.conference_name
+                                        ),
+                                      }
+                                    : {}
+                                }
+                              >
                                 {selectedVideoData.conference_name}
                               </span>
                             )}
@@ -427,8 +444,8 @@ export default function Home() {
           </div>
         </div>
 
-        {/* 사이드 패널 - 오른쪽에 고정, 메인 컨텐츠를 밀어냄 */}
-        {selectedVideoForNote && (
+        {/* 사이드 패널 - 오른쪽에 고정, 메인 컨텐츠를 밀어냄 (일반 모드) */}
+        {selectedVideoForNote && !isFullscreen && (
           <div
             className={cn(
               'fixed right-0 top-0 h-full w-96 border-l bg-background shadow-xl transition-transform duration-300 ease-in-out z-40',
@@ -453,12 +470,35 @@ export default function Home() {
                   {selectedVideoData.title}
                 </h2>
                 {selectedVideoData.conference_name && (
-                  <p className="mt-1 text-sm text-primary">
+                  <p
+                    className="mt-1 text-sm"
+                    style={
+                      getConferenceColor(selectedVideoData.conference_name)
+                        ? {
+                            color: getConferenceColor(
+                              selectedVideoData.conference_name
+                            ),
+                          }
+                        : {}
+                    }
+                  >
                     {selectedVideoData.conference_name}
                   </p>
                 )}
               </div>
               <div className="flex items-center gap-2 ml-4">
+                {user && (
+                  <Button
+                    variant="outline"
+                    onClick={() =>
+                      handleNoteClick(selectedVideoData.youtube_id)
+                    }
+                    className="gap-2"
+                  >
+                    <FileText className="h-4 w-4" />
+                    메모
+                  </Button>
+                )}
                 <Button
                   variant="ghost"
                   size="icon"
@@ -510,6 +550,23 @@ export default function Home() {
                 </div>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* 사이드 패널 - 전체보기 모드에서 오른쪽에 표시 */}
+        {selectedVideoForNote && isFullscreen && (
+          <div
+            className={cn(
+              'fixed right-0 top-0 h-full w-96 border-l bg-background shadow-xl transition-transform duration-300 ease-in-out z-[60]',
+              isNoteOpen ? 'translate-x-0' : 'translate-x-full'
+            )}
+          >
+            <VideoNotePanel
+              youtubeId={noteVideoId}
+              title={selectedVideoForNote.title}
+              isOpen={isNoteOpen}
+              onClose={handleCloseNote}
+            />
           </div>
         )}
       </div>

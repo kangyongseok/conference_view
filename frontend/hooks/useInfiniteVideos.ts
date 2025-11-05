@@ -77,7 +77,15 @@ export const useInfiniteVideos = ({
         });
       }
 
-      setVideos((prev) => [...prev, ...result.data]);
+      // 중복 제거: youtube_id를 기준으로 중복 제거
+      setVideos((prev) => {
+        const existingIds = new Set(prev.map((v) => v.youtube_id));
+        const newVideos = result.data.filter(
+          (v) => !existingIds.has(v.youtube_id)
+        );
+        return [...prev, ...newVideos];
+      });
+
       setTotal(result.total);
       setHasMore(result.data.length === pageSize);
       currentPageRef.current += 1;
