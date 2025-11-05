@@ -47,23 +47,51 @@ const VideoCard = ({
   isSelected = false,
 }: VideoCardProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const { logVideoPlayStart, logVideoOpenYouTube } = useAnalytics();
   const { isFavorite } = useFavorites();
   const isFavorited = isFavorite(youtubeId);
 
-  // isSelected가 변경되면 재생 상태 동기화
+  // 화면 크기 감지 (모바일/PC 구분)
   useEffect(() => {
-    if (isSelected) {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024); // lg 브레이크포인트 (1024px)
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // PC에서는 isSelected만 사용, 모바일에서는 isPlaying 사용
+  useEffect(() => {
+    if (isMobile) {
+      // 모바일: 카드 내부 재생
+      if (isSelected) {
+        setIsPlaying(true);
+        logVideoPlayStart(youtubeId, title);
+      } else {
+        setIsPlaying(false);
+      }
+    } else {
+      // PC: 상단에서만 재생, 카드 내부에서는 재생 안 함
+      setIsPlaying(false);
+    }
+  }, [isSelected, isMobile, youtubeId, title, logVideoPlayStart]);
+
+  const handleClick = () => {
+    if (isMobile) {
+      // 모바일: 카드 내부에서 재생
+      if (onVideoSelect) {
+        onVideoSelect(youtubeId);
+      }
       setIsPlaying(true);
       logVideoPlayStart(youtubeId, title);
     } else {
-      setIsPlaying(false);
-    }
-  }, [isSelected, youtubeId, title, logVideoPlayStart]);
-
-  const handleClick = () => {
-    if (onVideoSelect) {
-      onVideoSelect(youtubeId);
+      // PC: 상단에서만 재생
+      if (onVideoSelect) {
+        onVideoSelect(youtubeId);
+      }
     }
   };
 
@@ -82,13 +110,14 @@ const VideoCard = ({
     logVideoOpenYouTube(youtubeId);
   };
 
+  // PC에서는 isSelected일 때만 강조 표시, 모바일에서는 isPlaying일 때도 강조
+  const isHighlighted = isMobile ? isPlaying : isSelected;
+
   return (
     <Card
       className={cn(
         'group relative overflow-hidden transition-all hover:shadow-lg',
-        isSelected || isPlaying
-          ? 'ring-2 ring-primary ring-offset-2'
-          : 'cursor-pointer',
+        isHighlighted ? 'ring-2 ring-primary ring-offset-2' : 'cursor-pointer',
         isFavorited && 'ring-1 ring-yellow-500/50',
         className
       )}
@@ -96,7 +125,8 @@ const VideoCard = ({
     >
       {/* 썸네일 또는 비디오 플레이어 */}
       <div className="relative aspect-video w-full overflow-hidden bg-muted">
-        {isPlaying ? (
+        {/* 모바일에서만 카드 내부 재생 */}
+        {isMobile && isPlaying ? (
           <>
             {/* 비디오 플레이어 */}
             <div className="absolute inset-0">

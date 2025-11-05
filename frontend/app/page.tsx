@@ -198,10 +198,11 @@ export default function Home() {
               <div className="text-sm text-muted-foreground">총 {total}개</div>
             </div>
 
+            {/* PC에서만 상단 비디오 플레이어 표시 */}
             {selectedVideoData && !isFullscreen && (
               <div
                 id="video-player"
-                className="mb-6 space-y-4 rounded-lg border bg-card p-4 shadow-sm lg:mb-8"
+                className="hidden lg:block mb-6 space-y-4 rounded-lg border bg-card p-4 shadow-sm lg:mb-8"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
