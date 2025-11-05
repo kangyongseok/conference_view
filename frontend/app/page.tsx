@@ -43,8 +43,10 @@ export default function Home() {
     sortBy: 'newest',
   });
 
-  const [selectedVideoId, setSelectedVideoId] = useState<string>('');
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [videoPlayerState, setVideoPlayerState] = useState<{
+    videoId: string;
+    isFullscreen: boolean;
+  } | null>(null);
   const [isNoteOpen, setIsNoteOpen] = useState(false);
   const [noteVideoId, setNoteVideoId] = useState<string>('');
   const { user } = useAuth();
@@ -86,25 +88,27 @@ export default function Home() {
 
   // 선택된 비디오 정보
   const selectedVideoData = useMemo(() => {
-    if (!selectedVideoId) return null;
-    return videos.find((v) => v.youtube_id === selectedVideoId) || null;
-  }, [selectedVideoId, videos]);
+    if (!videoPlayerState?.videoId) return null;
+    return (
+      videos.find((v) => v.youtube_id === videoPlayerState.videoId) || null
+    );
+  }, [videoPlayerState, videos]);
 
   const handleVideoSelect = (youtubeId: string) => {
-    if (selectedVideoId === youtubeId && isFullscreen) {
+    if (
+      videoPlayerState?.videoId === youtubeId &&
+      videoPlayerState?.isFullscreen
+    ) {
       // 같은 비디오를 클릭하고 전체보기 모드일 때는 닫기
-      setSelectedVideoId('');
-      setIsFullscreen(false);
+      setVideoPlayerState(null);
     } else {
       // 새로운 비디오를 선택하면 바로 전체보기 모드로
-      setSelectedVideoId(youtubeId);
-      setIsFullscreen(true);
+      setVideoPlayerState({ videoId: youtubeId, isFullscreen: true });
     }
   };
 
   const handleCloseVideo = () => {
-    setIsFullscreen(false);
-    setSelectedVideoId('');
+    setVideoPlayerState(null);
   };
 
   const handleOpenYouTube = () => {
@@ -148,27 +152,27 @@ export default function Home() {
 
   // 풀스크린 로그
   useEffect(() => {
-    if (isFullscreen && selectedVideoId) {
-      logFullscreenEnter(selectedVideoId);
-    } else if (!isFullscreen && selectedVideoId) {
-      logFullscreenExit(selectedVideoId);
+    if (videoPlayerState?.isFullscreen && videoPlayerState?.videoId) {
+      logFullscreenEnter(videoPlayerState.videoId);
+    } else if (!videoPlayerState?.isFullscreen && videoPlayerState?.videoId) {
+      logFullscreenExit(videoPlayerState.videoId);
     }
-  }, [isFullscreen, selectedVideoId, logFullscreenEnter, logFullscreenExit]);
+  }, [videoPlayerState, logFullscreenEnter, logFullscreenExit]);
 
   useEffect(() => {
-    if (!selectedVideoId) {
-      setIsFullscreen(false);
+    if (!videoPlayerState?.videoId) {
+      setVideoPlayerState(null);
     }
-  }, [selectedVideoId]);
+  }, [videoPlayerState]);
 
   useEffect(() => {
     const handleEscKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && isFullscreen) {
-        setIsFullscreen(false);
+      if (event.key === 'Escape' && videoPlayerState?.isFullscreen) {
+        setVideoPlayerState(null);
       }
     };
 
-    if (isFullscreen) {
+    if (videoPlayerState?.isFullscreen) {
       document.addEventListener('keydown', handleEscKey);
       document.body.style.overflow = 'hidden';
     } else {
@@ -179,10 +183,13 @@ export default function Home() {
       document.removeEventListener('keydown', handleEscKey);
       document.body.style.overflow = '';
     };
-  }, [isFullscreen]);
+  }, [videoPlayerState]);
 
   const handleToggleFullscreen = () => {
-    setIsFullscreen(!isFullscreen);
+    setVideoPlayerState({
+      videoId: videoPlayerState?.videoId || '',
+      isFullscreen: !videoPlayerState?.isFullscreen,
+    });
   };
 
   return (
@@ -192,14 +199,14 @@ export default function Home() {
         <div
           className={cn(
             'flex-1 overflow-y-auto transition-all duration-300',
-            isNoteOpen && !isFullscreen && 'mr-96'
+            isNoteOpen && !videoPlayerState?.isFullscreen && 'mr-96'
           )}
         >
           <div className="container mx-auto p-4 lg:p-6">
             <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <h1 className="text-2xl font-bold sm:text-3xl">비디오 목록</h1>
               <div className="flex items-center gap-4">
-                {selectedVideoData && !isFullscreen && (
+                {selectedVideoData && !videoPlayerState?.isFullscreen && (
                   <div className="hidden text-sm text-muted-foreground lg:block">
                     총 {total}개 비디오
                   </div>
@@ -250,7 +257,7 @@ export default function Home() {
                   </div>
 
                   {/* PC에서만 상단 비디오 플레이어 표시 */}
-                  {selectedVideoData && !isFullscreen && (
+                  {selectedVideoData && !videoPlayerState?.isFullscreen && (
                     <div
                       id="video-player"
                       className="hidden lg:block mb-6 space-y-4 rounded-lg border bg-card p-4 shadow-sm lg:mb-8"
@@ -390,7 +397,9 @@ export default function Home() {
                               description={video.description}
                               videoUrl={video.video_url || undefined}
                               onVideoSelect={handleVideoSelect}
-                              isSelected={selectedVideoId === video.youtube_id}
+                              isSelected={
+                                videoPlayerState?.videoId === video.youtube_id
+                              }
                               onNoteClick={handleNoteClick}
                               className={cn('transition-all')}
                             />
@@ -445,7 +454,7 @@ export default function Home() {
         </div>
 
         {/* 사이드 패널 - 오른쪽에 고정, 메인 컨텐츠를 밀어냄 (일반 모드) */}
-        {selectedVideoForNote && !isFullscreen && (
+        {selectedVideoForNote && !videoPlayerState?.isFullscreen && (
           <div
             className={cn(
               'fixed right-0 top-0 h-full w-96 border-l bg-background shadow-xl transition-transform duration-300 ease-in-out z-40',
@@ -462,7 +471,7 @@ export default function Home() {
         )}
 
         {/* 전체보기 모드 */}
-        {selectedVideoData && isFullscreen && (
+        {selectedVideoData && videoPlayerState?.isFullscreen && (
           <div className="fixed inset-0 z-50 flex flex-col bg-background">
             <div className="flex items-center justify-between border-b bg-card px-4 py-3">
               <div className="flex-1 min-w-0">
@@ -554,7 +563,7 @@ export default function Home() {
         )}
 
         {/* 사이드 패널 - 전체보기 모드에서 오른쪽에 표시 */}
-        {selectedVideoForNote && isFullscreen && (
+        {selectedVideoForNote && videoPlayerState?.isFullscreen && (
           <div
             className={cn(
               'fixed right-0 top-0 h-full w-96 border-l bg-background shadow-xl transition-transform duration-300 ease-in-out z-[60]',

@@ -47,5 +47,13 @@ export const getConferenceColor = (conferenceName: string | null): string => {
     return '#3EB7F3';
   }
 
+  if (conferenceName.includes('채널톡')) {
+    return 'rgb(124, 100, 253)';
+  }
+
+  if (conferenceName.includes('인프런')) {
+    return '#00C471';
+  }
+
   return '';
 };
