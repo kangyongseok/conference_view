@@ -6,10 +6,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import VideoPlayer from '@/components/VideoPlayer';
 import { Button } from '@/components/ui/button';
 import FavoriteButton from '@/components/FavoriteButton';
-import { ExternalLink, X, Maximize2, Star } from 'lucide-react';
+import { ExternalLink, X, Maximize2, Star, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAnalytics } from '../hooks/useAnalytics';
 import { useFavorites } from '@/contexts/FavoritesContext';
+import { VideoNotePanel } from '@/components/VideoNotePanel';
 
 interface VideoCardProps {
   youtubeId: string;
@@ -22,6 +23,7 @@ interface VideoCardProps {
   className?: string;
   onVideoSelect?: (youtubeId: string) => void;
   isSelected?: boolean;
+  onNoteClick?: (youtubeId: string) => void;
 }
 
 const formatDate = (dateString: string | null): string => {
@@ -45,6 +47,7 @@ const VideoCard = ({
   className,
   onVideoSelect,
   isSelected = false,
+  onNoteClick,
 }: VideoCardProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -176,6 +179,24 @@ const VideoCard = ({
                 <span className="hidden sm:inline">유튜브</span>
               </Button>
             </div>
+            {/* 메모 버튼 - 우측 하단 (PC에서만 표시) */}
+            {onNoteClick && !isMobile && (
+              <div className="absolute bottom-2 right-2 z-10">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onNoteClick(youtubeId);
+                  }}
+                  className="gap-2 bg-black/50 hover:bg-black/70 text-white"
+                  aria-label="메모 작성"
+                >
+                  <FileText className="h-4 w-4" />
+                  <span className="hidden sm:inline">메모</span>
+                </Button>
+              </div>
+            )}
           </>
         ) : (
           <>
