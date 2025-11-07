@@ -53,7 +53,8 @@
 - **메모 작성**: 영상 재생 중 오른쪽 패널에서 메모를 작성할 수 있습니다
 - **YouTube 링크**: 원본 YouTube 영상으로 이동할 수 있는 버튼 제공
 
-<img width="2400" height="2904" alt="video-player-fullscreen" src="https://github.com/user-attachments/assets/dea8c9da-df09-417e-a199-edbb90c45523" />
+<img width="1885" height="935" alt="스크린샷 2025-11-07 16 10 47" src="https://github.com/user-attachments/assets/7316632b-2b4e-4f97-ad53-0410985142a2" />
+
 
 
 ### 3. 즐겨찾기
@@ -62,6 +63,9 @@
 
 - **즐겨찾기 추가/제거**: 각 비디오 카드의 별 아이콘을 클릭하여 즐겨찾기에 추가/제거
 - **즐겨찾기 목록**: 상단 네비게이션의 "즐겨찾기" 버튼을 클릭하여 즐겨찾기한 영상만 모아서 볼 수 있습니다
+
+<img width="1090" height="880" alt="스크린샷 2025-11-07 16 11 10" src="https://github.com/user-attachments/assets/72b75929-fed6-447c-9767-14dc6dbff03a" />
+
 
 ### 4. 북마크
 
@@ -73,7 +77,8 @@
 - **무한 스크롤**: 북마크 목록도 무한 스크롤을 지원합니다
 - **중복 방지**: 동일한 URL은 중복 추가할 수 없습니다
 
-<img width="2400" height="2904" alt="bookmarks-page" src="https://github.com/user-attachments/assets/825d85d6-d523-447f-952c-0da7cbe23174" />
+<img width="1553" height="911" alt="스크린샷 2025-11-07 16 11 38" src="https://github.com/user-attachments/assets/ef3100e3-3a6e-4217-978e-d847c01c0426" />
+
 
 
 ### 5. 메모 작성
