@@ -17,6 +17,7 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://conference-view.com'),
   title: {
     default: '컨퍼런스 비디오 | 개발 컨퍼런스 발표 영상 모음',
     template: '%s | 컨퍼런스 비디오',
@@ -45,7 +46,7 @@ export const metadata: Metadata = {
       'FEConf, NDC, if(kakao) 등 다양한 개발 컨퍼런스의 발표 영상을 연도, 컨퍼런스, 개발언어, 직군별로 필터링하여 볼 수 있습니다.',
     images: [
       {
-        url: '/og-image.jpg',
+        url: '/og-image.png',
         width: 1200,
         height: 630,
         alt: '컨퍼런스 비디오',
@@ -57,7 +58,7 @@ export const metadata: Metadata = {
     title: '컨퍼런스 비디오 | 개발 컨퍼런스 발표 영상 모음',
     description:
       'FEConf, NDC, if(kakao) 등 다양한 개발 컨퍼런스의 발표 영상을 필터링하여 볼 수 있습니다.',
-    images: ['/og-image.jpg'],
+    images: ['/og-image.png'],
   },
   robots: {
     index: true,
@@ -81,15 +82,44 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   // 환경 변수는 서버 컴포넌트에서 직접 접근 (NEXT_PUBLIC_ 접두사는 클라이언트에서도 접근 가능)
-  const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || process.env.NEXT_PUBLIC_GA_ID;
+  const GA_MEASUREMENT_ID =
+    process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || process.env.NEXT_PUBLIC_GA_ID;
   const isDevelopment = process.env.NODE_ENV === 'development';
 
   return (
     <html lang="ko" suppressHydrationWarning>
       <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'WebApplication',
+              name: '컨퍼런스 비디오',
+              description: '개발 컨퍼런스 발표 영상 모음',
+              url: 'https://conference-view.com',
+              applicationCategory: 'EducationalApplication',
+            }),
+          }}
+        />
         <link rel="icon" href="/favicon.ico" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#000000" />
+        <meta name="format-detection" content="telephone=no" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta
+          name="apple-mobile-web-app-status-bar-style"
+          content="black-translucent"
+        />
+        <meta property="og:image:type" content="image/png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content="컨퍼런스 비디오" />
+
+        <meta property="og:locale" content="ko_KR" />
+        <meta property="og:site_name" content="컨퍼런스 비디오" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         {/* Google Analytics */}
         {GA_MEASUREMENT_ID && !isDevelopment && (
           <>
