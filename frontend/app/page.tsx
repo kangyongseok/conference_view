@@ -385,6 +385,7 @@ export default function Home() {
                               }
                               onNoteClick={handleNoteClick}
                               className={cn('transition-all')}
+                              priority={index < 4} // LCP 최적화: 첫 4개 카드에 priority 적용 (fetchpriority=high, loading=eager)
                             />
                           </div>
                         ))}

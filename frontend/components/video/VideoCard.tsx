@@ -24,6 +24,7 @@ interface VideoCardProps {
   onVideoSelect?: (youtubeId: string) => void;
   isSelected?: boolean;
   onNoteClick?: (youtubeId: string) => void;
+  priority?: boolean; // LCP 최적화를 위한 우선순위 로딩
 }
 
 const formatDate = (dateString: string | null): string => {
@@ -48,6 +49,7 @@ const VideoCard = ({
   onVideoSelect,
   isSelected = false,
   onNoteClick,
+  priority = false,
 }: VideoCardProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -206,6 +208,8 @@ const VideoCard = ({
               fill
               className="object-cover transition-transform group-hover:scale-105"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              priority={priority}
+              // priority={true}일 때 자동으로 fetchpriority="high"와 loading="eager"가 적용됩니다
             />
             {/* 즐겨찾기 뱃지 (좌상단) */}
             {isFavorited && (
