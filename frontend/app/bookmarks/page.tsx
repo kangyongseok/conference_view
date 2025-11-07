@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAnalytics } from '@/hooks/useAnalytics';
 import { Button } from '@/components/ui/button';
 import { AuthButton } from '@/components/AuthButton';
 import { ThemeToggle } from '@/components/ThemeToggle';
@@ -23,6 +24,12 @@ import { TagSidebar } from '@/components/TagSidebar';
 export default function BookmarksPage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
+  const {
+    logBookmarkAdd,
+    logBookmarkDelete,
+    logBookmarkTagUpdate,
+    logBookmarkFilter,
+  } = useAnalytics();
   const [bookmarks, setBookmarks] = useState<BookmarkType[]>([]);
   const [allTags, setAllTags] = useState<string[]>([]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -104,6 +111,13 @@ export default function BookmarksPage() {
     }
   }, [user, selectedTags.join(',')]); // selectedTags 변경 시 재로드
 
+  // 태그 필터 변경 시 로그
+  useEffect(() => {
+    if (user && selectedTags.length > 0) {
+      logBookmarkFilter(selectedTags);
+    }
+  }, [selectedTags, user, logBookmarkFilter]);
+
   // 무한 스크롤 감지
   const observerRef = useRef<IntersectionObserver | null>(null);
   const lastElementRef = useCallback(
@@ -132,6 +146,7 @@ export default function BookmarksPage() {
       setIsAdding(true);
       try {
         await createBookmark(user.id, url, tags);
+        logBookmarkAdd(url, tags);
         await loadBookmarks(true);
         await loadTags();
       } catch (error) {
@@ -141,7 +156,7 @@ export default function BookmarksPage() {
         setIsAdding(false);
       }
     },
-    [user, loadBookmarks, loadTags]
+    [user, loadBookmarks, loadTags, logBookmarkAdd]
   );
 
   // 북마크 삭제 핸들러 (메모이제이션)
@@ -150,7 +165,11 @@ export default function BookmarksPage() {
       if (!confirm('북마크를 삭제하시겠습니까?')) return;
 
       try {
+        const bookmark = bookmarks.find((b) => b.id === bookmarkId);
         await deleteBookmark(bookmarkId);
+        if (bookmark) {
+          logBookmarkDelete(bookmarkId, bookmark.url);
+        }
         setBookmarks((prev) => prev.filter((b) => b.id !== bookmarkId));
         setTotal((prev) => prev - 1);
         await loadTags();
@@ -159,7 +178,7 @@ export default function BookmarksPage() {
         alert('북마크 삭제에 실패했습니다.');
       }
     },
-    [loadTags]
+    [loadTags, bookmarks, logBookmarkDelete]
   );
 
   // 태그 업데이트 핸들러 (메모이제이션)
@@ -167,6 +186,7 @@ export default function BookmarksPage() {
     async (bookmarkId: number, newTags: string[]) => {
       try {
         await updateBookmark(bookmarkId, { tags: newTags });
+        logBookmarkTagUpdate(bookmarkId, newTags);
         setBookmarks((prev) =>
           prev.map((b) => (b.id === bookmarkId ? { ...b, tags: newTags } : b))
         );
@@ -176,7 +196,7 @@ export default function BookmarksPage() {
         alert('태그 업데이트에 실패했습니다.');
       }
     },
-    [loadTags]
+    [loadTags, logBookmarkTagUpdate]
   );
 
   // 태그 선택 핸들러 (메모이제이션)

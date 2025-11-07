@@ -170,6 +170,82 @@ export const useAnalytics = () => {
     [user?.id]
   );
 
+  // 북마크 추가
+  const logBookmarkAdd = useCallback(
+    (url: string, tags?: string[]) => {
+      event({
+        action: 'bookmark_add',
+        category: 'Bookmark',
+        label: url,
+        bookmark_url: url,
+        tags: tags?.join(',') || '',
+        tag_count: tags?.length || 0,
+        user_id: user?.id || 'anonymous',
+      });
+    },
+    [user?.id]
+  );
+
+  // 북마크 삭제
+  const logBookmarkDelete = useCallback(
+    (bookmarkId: number, url: string) => {
+      event({
+        action: 'bookmark_delete',
+        category: 'Bookmark',
+        label: url,
+        bookmark_id: bookmarkId,
+        bookmark_url: url,
+        user_id: user?.id || 'anonymous',
+      });
+    },
+    [user?.id]
+  );
+
+  // 북마크 태그 업데이트
+  const logBookmarkTagUpdate = useCallback(
+    (bookmarkId: number, tags: string[]) => {
+      event({
+        action: 'bookmark_tag_update',
+        category: 'Bookmark',
+        label: `bookmark_${bookmarkId}`,
+        bookmark_id: bookmarkId,
+        tags: tags.join(','),
+        tag_count: tags.length,
+        user_id: user?.id || 'anonymous',
+      });
+    },
+    [user?.id]
+  );
+
+  // 북마크 열기 (외부 링크)
+  const logBookmarkOpen = useCallback(
+    (url: string) => {
+      event({
+        action: 'bookmark_open',
+        category: 'Bookmark',
+        label: url,
+        bookmark_url: url,
+        user_id: user?.id || 'anonymous',
+      });
+    },
+    [user?.id]
+  );
+
+  // 북마크 태그 필터 적용
+  const logBookmarkFilter = useCallback(
+    (tags: string[]) => {
+      event({
+        action: 'bookmark_filter',
+        category: 'Bookmark',
+        label: tags.join(','),
+        tags: tags.join(','),
+        tag_count: tags.length,
+        user_id: user?.id || 'anonymous',
+      });
+    },
+    [user?.id]
+  );
+
   // 사용자 정의 이벤트
   const logEvent = useCallback(
     (
@@ -202,6 +278,11 @@ export const useAnalytics = () => {
     logLogout,
     logFullscreenEnter,
     logFullscreenExit,
+    logBookmarkAdd,
+    logBookmarkDelete,
+    logBookmarkTagUpdate,
+    logBookmarkOpen,
+    logBookmarkFilter,
     logEvent,
   };
 };

@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import type { Bookmark } from '@/lib/supabase/queries';
 import { cn } from '@/lib/utils';
+import { useAnalytics } from '@/hooks/useAnalytics';
 
 interface BookmarkCardProps {
   bookmark: Bookmark;
@@ -31,6 +32,7 @@ export const BookmarkCard = ({
   onDelete,
   onUpdateTags,
 }: BookmarkCardProps) => {
+  const { logBookmarkOpen } = useAnalytics();
   const [isEditingTags, setIsEditingTags] = useState(false);
   const [editTags, setEditTags] = useState<string[]>(bookmark.tags);
   const [newTag, setNewTag] = useState('');
@@ -55,6 +57,11 @@ export const BookmarkCard = ({
 
   const handleImageError = () => {
     setImageError(true);
+  };
+
+  const handleOpenBookmark = () => {
+    logBookmarkOpen(bookmark.url);
+    window.open(bookmark.url, '_blank', 'noopener,noreferrer');
   };
 
   // 이미지 표시 여부 결정
@@ -240,11 +247,14 @@ export const BookmarkCard = ({
               <Trash2 className="h-4 w-4" />
             </Button>
           </div>
-          <Button variant="outline" size="sm" asChild className="gap-2">
-            <a href={bookmark.url} target="_blank" rel="noopener noreferrer">
-              <ExternalLink className="h-4 w-4" />
-              열기
-            </a>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleOpenBookmark}
+            className="gap-2"
+          >
+            <ExternalLink className="h-4 w-4" />
+            열기
           </Button>
         </div>
       </CardContent>
