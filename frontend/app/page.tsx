@@ -13,6 +13,7 @@ import {
   Minimize2,
   Loader2,
   FileText,
+  Bookmark,
 } from 'lucide-react';
 import { cn, getConferenceColor } from '@/lib/utils';
 import { AuthButton } from '@/components/AuthButton';
@@ -212,18 +213,34 @@ export default function Home() {
                   </div>
                 )}
                 {user && (
-                  <Link href="/favorites">
-                    <Button variant="ghost" size="sm" className="gap-2">
-                      <Star className="h-4 w-4" />
-                      <span className="hidden sm:inline">즐겨찾기</span>
-                    </Button>
-                  </Link>
+                  <>
+                    <Link href="/favorites">
+                      <Button variant="ghost" size="sm" className="gap-2">
+                        <Star className="h-4 w-4" />
+                        <span className="hidden sm:inline">즐겨찾기</span>
+                      </Button>
+                    </Link>
+                    <Link href="/bookmarks">
+                      <Button variant="ghost" size="sm" className="gap-2">
+                        <Bookmark className="h-4 w-4" />
+                        <span className="hidden sm:inline">북마크</span>
+                      </Button>
+                    </Link>
+                  </>
                 )}
                 {!user && (
-                  <div className="hidden items-center gap-2 text-sm text-muted-foreground sm:flex">
-                    <FileText className="h-4 w-4" />
-                    <span>로그인하면 영상 보며 메모 작성 가능</span>
-                  </div>
+                  <>
+                    <Link href="/bookmarks">
+                      <Button variant="ghost" size="sm" className="gap-2">
+                        <Bookmark className="h-4 w-4" />
+                        <span className="hidden sm:inline">북마크</span>
+                      </Button>
+                    </Link>
+                    <div className="hidden items-center gap-2 text-sm text-muted-foreground sm:flex">
+                      <FileText className="h-4 w-4" />
+                      <span>로그인하면 영상 보며 메모 작성 가능</span>
+                    </div>
+                  </>
                 )}
                 <AuthButton />
                 <ThemeToggle />
@@ -566,7 +583,7 @@ export default function Home() {
         {selectedVideoForNote && videoPlayerState?.isFullscreen && (
           <div
             className={cn(
-              'fixed right-0 top-0 h-full w-96 border-l bg-background shadow-xl transition-transform duration-300 ease-in-out z-[60]',
+              'fixed right-0 top-0 h-full w-96 border-l bg-background shadow-xl transition-transform duration-300 ease-in-out z-60',
               isNoteOpen ? 'translate-x-0' : 'translate-x-full'
             )}
           >

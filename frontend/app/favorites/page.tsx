@@ -117,7 +117,7 @@ export default function FavoritesPage() {
       {/* 메인 레이아웃 */}
       <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
         {/* 좌측: 필터 사이드바 */}
-        <aside className="lg:sticky lg:top-4 lg:w-64 lg:flex-shrink-0 lg:self-start">
+        <aside className="lg:sticky lg:top-4 lg:w-64 lg:shrink-0 lg:self-start">
           <div className="sticky top-0 z-40 bg-background pb-4 lg:static lg:z-auto">
             <div className="mb-4 text-sm font-semibold lg:mb-2 lg:text-xs lg:uppercase lg:tracking-wider lg:text-muted-foreground">
               필터
