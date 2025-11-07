@@ -46,7 +46,7 @@ export const metadata: Metadata = {
       'FEConf, NDC, if(kakao) 등 다양한 개발 컨퍼런스의 발표 영상을 연도, 컨퍼런스, 개발언어, 직군별로 필터링하여 볼 수 있습니다.',
     images: [
       {
-        url: '/og-image.png',
+        url: 'https://conference-view.com/og-image.png',
         width: 1200,
         height: 630,
         alt: '컨퍼런스 비디오',
@@ -58,7 +58,7 @@ export const metadata: Metadata = {
     title: '컨퍼런스 비디오 | 개발 컨퍼런스 발표 영상 모음',
     description:
       'FEConf, NDC, if(kakao) 등 다양한 개발 컨퍼런스의 발표 영상을 필터링하여 볼 수 있습니다.',
-    images: ['/og-image.png'],
+    images: ['https://conference-view.com/og-image.png'],
   },
   robots: {
     index: true,
@@ -120,6 +120,14 @@ export default function RootLayout({
         <meta property="og:locale" content="ko_KR" />
         <meta property="og:site_name" content="컨퍼런스 비디오" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <meta
+          property="og:image"
+          content="https://conference-view.com/og-image.png"
+        />
+        <meta
+          property="og:image:secure_url"
+          content="https://conference-view.com/og-image.png"
+        />
         {/* Google Analytics */}
         {GA_MEASUREMENT_ID && !isDevelopment && (
           <>
