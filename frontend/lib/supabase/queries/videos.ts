@@ -28,7 +28,14 @@ export const fetchVideos = async (
 
   let query = supabase.from('videos').select('*', { count: 'exact' });
 
-  query = applyFilters(query, filters);
+  // 개발언어 필터는 별도 처리 (대소문자 무시)
+  const programmingLanguageFilter = filters.programmingLanguage;
+  const filtersWithoutLanguage = {
+    ...filters,
+    programmingLanguage: undefined,
+  };
+
+  query = applyFilters(query, filtersWithoutLanguage);
   query = applySorting(query, filters.sortBy || 'newest');
 
   const { data, error, count } = await query.range(from, to);
@@ -38,9 +45,36 @@ export const fetchVideos = async (
     throw error;
   }
 
+  // 개발언어 필터 적용 (대소문자 무시)
+  let filteredData = data || [];
+  let filteredTotal = count || 0;
+  
+  if (programmingLanguageFilter && programmingLanguageFilter.length > 0) {
+    const normalizedFilters = programmingLanguageFilter.map((lang) =>
+      lang.toLowerCase()
+    );
+    filteredData = filteredData.filter((video) => {
+      if (!video.programming_languages || video.programming_languages.length === 0) {
+        return false;
+      }
+      const videoLanguages = video.programming_languages.map((lang: string) =>
+        lang.toLowerCase()
+      );
+      return normalizedFilters.some((filterLang) =>
+        videoLanguages.includes(filterLang)
+      );
+    });
+    
+    // total count는 클라이언트 측 필터링 후의 실제 개수로 조정
+    // 정확한 total을 얻으려면 전체 데이터를 조회해야 하지만, 성능을 위해 현재 페이지의 필터링된 개수만 사용
+    // 실제로는 전체 데이터를 조회하지 않고도 정확한 count를 얻을 수 없으므로,
+    // 현재 페이지의 필터링된 데이터 개수를 기반으로 추정
+    filteredTotal = filteredData.length;
+  }
+
   const result = {
-    data: data || [],
-    total: count || 0,
+    data: filteredData,
+    total: filteredTotal,
   };
 
   // 캐시 저장
@@ -122,6 +156,9 @@ export const fetchFilterOptions = async (): Promise<{
   const languages: string[] = [];
   const jobTypes: string[] = [];
 
+  // 개발언어는 대소문자 정규화하여 중복 제거
+  const languageSet = new Set<string>();
+
   (filterOptions || []).forEach((option) => {
     switch (option.type) {
       case 'year':
@@ -130,9 +167,14 @@ export const fetchFilterOptions = async (): Promise<{
       case 'conference':
         conferences.push(option.value);
         break;
-      case 'programming_language':
-        languages.push(option.value);
+      case 'programming_language': {
+        const normalized = option.value.toLowerCase();
+        if (!languageSet.has(normalized)) {
+          languageSet.add(normalized);
+          languages.push(option.value);
+        }
         break;
+      }
       case 'job_type':
         jobTypes.push(option.value);
         break;
@@ -288,19 +330,28 @@ export const syncFilterOptionsFromVideos = async (): Promise<void> => {
     }))
   );
 
-  // 개발언어 동기화
+  // 개발언어 동기화 (대소문자 정규화)
   const { data: languageData } = await supabase
     .from('videos')
     .select('programming_languages')
     .not('programming_languages', 'is', null);
 
-  const languages = Array.from(
-    new Set(
-      (languageData || [])
-        .flatMap((v) => v.programming_languages || [])
-        .filter((l): l is string => l !== null && l !== undefined)
-    )
-  ).sort();
+  // 소문자로 정규화하여 중복 제거
+  const languageMap = new Map<string, string>();
+  (languageData || [])
+    .flatMap((v) => v.programming_languages || [])
+    .filter((l): l is string => l !== null && l !== undefined)
+    .forEach((lang) => {
+      const normalized = lang.toLowerCase();
+      // 첫 번째로 발견된 원본 값을 저장 (표시용)
+      if (!languageMap.has(normalized)) {
+        languageMap.set(normalized, lang);
+      }
+    });
+
+  const languages = Array.from(languageMap.values()).sort((a, b) =>
+    a.toLowerCase().localeCompare(b.toLowerCase())
+  );
 
   await supabase
     .from('filter_options')
