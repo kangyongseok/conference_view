@@ -1,8 +1,9 @@
 # 컨퍼런스 비디오 (Conference View)
 
 개발 컨퍼런스 발표 영상을 한 곳에서 모아보고, 필터링하여 검색할 수 있는 웹 애플리케이션입니다.
+<img width="2400" height="2904" alt="main-page" src="https://github.com/user-attachments/assets/2feb00d4-40f8-42d4-b5ea-03a9b3cdc0c1" />
 
-![Main Page](docs/screenshots/main-page.png)
+
 
 ## 📋 목차
 
@@ -43,7 +44,6 @@
 - **정렬 옵션**: 최신순, 오래된순, 제목순 정렬
 - **무한 스크롤**: 스크롤을 내리면 자동으로 다음 페이지의 영상이 로드됩니다
 
-![Main Page](docs/screenshots/main-page.png)
 
 ### 2. 비디오 재생
 
@@ -53,7 +53,8 @@
 - **메모 작성**: 영상 재생 중 오른쪽 패널에서 메모를 작성할 수 있습니다
 - **YouTube 링크**: 원본 YouTube 영상으로 이동할 수 있는 버튼 제공
 
-![Video Player Fullscreen](docs/screenshots/video-player-fullscreen.png)
+<img width="2400" height="2904" alt="video-player-fullscreen" src="https://github.com/user-attachments/assets/dea8c9da-df09-417e-a199-edbb90c45523" />
+
 
 ### 3. 즐겨찾기
 
@@ -72,7 +73,8 @@
 - **무한 스크롤**: 북마크 목록도 무한 스크롤을 지원합니다
 - **중복 방지**: 동일한 URL은 중복 추가할 수 없습니다
 
-![Bookmarks Page](docs/screenshots/bookmarks-page.png)
+<img width="2400" height="2904" alt="bookmarks-page" src="https://github.com/user-attachments/assets/825d85d6-d523-447f-952c-0da7cbe23174" />
+
 
 ### 5. 메모 작성
 
