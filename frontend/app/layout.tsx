@@ -112,14 +112,7 @@ export default function RootLayout({
           name="apple-mobile-web-app-status-bar-style"
           content="black-translucent"
         />
-        <meta property="og:image:type" content="image/png" />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
-        <meta property="og:image:alt" content="컨퍼런스 비디오" />
-
-        <meta property="og:locale" content="ko_KR" />
-        <meta property="og:site_name" content="컨퍼런스 비디오" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        {/* OG 이미지 메타 태그 명시적 추가 */}
         <meta
           property="og:image"
           content="https://conference-view.com/og-image.png"
@@ -128,6 +121,22 @@ export default function RootLayout({
           property="og:image:secure_url"
           content="https://conference-view.com/og-image.png"
         />
+        <meta property="og:image:type" content="image/png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content="컨퍼런스 비디오" />
+
+        {/* Twitter Card 이미지 */}
+        <meta
+          name="twitter:image"
+          content="https://conference-view.com/og-image.png"
+        />
+        <meta
+          name="twitter:image:src"
+          content="https://conference-view.com/og-image.png"
+        />
+
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         {/* Google Analytics */}
         {GA_MEASUREMENT_ID && !isDevelopment && (
           <>
