@@ -1,36 +1,26 @@
-import { Metadata } from 'next';
+import type { Metadata } from 'next';
 
-// app/bookmarks/layout.tsx
 export const metadata: Metadata = {
   title: '북마크',
   description:
     '유용한 웹사이트와 리소스를 북마크로 저장하고 태그로 관리하세요.',
   keywords: ['북마크', 'bookmark', '리소스 관리', '태그'],
   openGraph: {
-    type: 'website', // 추가 필요
+    type: 'website',
     title: '북마크 | 컨퍼런스 비디오',
     description:
       '유용한 웹사이트와 리소스를 북마크로 저장하고 태그로 관리하세요.',
     url: 'https://conference-view.com/bookmarks',
-    images: [
-      // 추가 필요
-      {
-        url: '/og-image.jpg',
-        width: 1200,
-        height: 630,
-        alt: '북마크 페이지',
-      },
-    ],
+    // images 제거 - 루트의 기본 이미지 상속
   },
   twitter: {
-    card: 'summary_large_image', // summary에서 변경
+    card: 'summary_large_image',
     title: '북마크 | 컨퍼런스 비디오',
     description:
       '유용한 웹사이트와 리소스를 북마크로 저장하고 태그로 관리하세요.',
-    images: ['/og-image.jpg'], // 추가 필요
+    // images 제거 - 루트의 기본 이미지 상속
   },
   robots: {
-    // 추가 필요
     index: false,
     follow: true,
   },
@@ -38,3 +28,12 @@ export const metadata: Metadata = {
     canonical: 'https://conference-view.com/bookmarks',
   },
 };
+
+// default export 추가 필요
+export default function BookmarksLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return <>{children}</>;
+}

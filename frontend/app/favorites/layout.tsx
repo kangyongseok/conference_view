@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     url: 'https://conference-view.com/favorites',
   },
   twitter: {
-    card: 'summary',
+    card: 'summary_large_image', // summary에서 변경
     title: '즐겨찾기 | 컨퍼런스 비디오',
     description: '관심 있는 컨퍼런스 발표 영상을 즐겨찾기로 모아서 보세요.',
   },
@@ -18,7 +18,16 @@ export const metadata: Metadata = {
     canonical: 'https://conference-view.com/favorites',
   },
   robots: {
-    index: false, // 로그인 필요 페이지는 인덱싱 제외 고려
+    index: false,
     follow: true,
   },
 };
+
+// default export 추가 필요
+export default function FavoritesLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return <>{children}</>;
+}
