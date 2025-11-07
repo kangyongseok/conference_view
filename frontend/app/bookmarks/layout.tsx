@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     title: '북마크 | 컨퍼런스 비디오',
     description:
       '유용한 웹사이트와 리소스를 북마크로 저장하고 태그로 관리하세요.',
-    url: 'https://conference-view.com/bookmarks',
+    url: 'https://conference-view.vercel.app/bookmarks',
     // images 제거 - 루트의 기본 이미지 상속
   },
   twitter: {
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     follow: true,
   },
   alternates: {
-    canonical: 'https://conference-view.com/bookmarks',
+    canonical: 'https://conference-view.vercel.app/bookmarks',
   },
 };
 

@@ -17,7 +17,7 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://conference-view.com'),
+  metadataBase: new URL('https://conference-view.vercel.app'),
   title: {
     default: '컨퍼런스 비디오 | 개발 컨퍼런스 발표 영상 모음',
     template: '%s | 컨퍼런스 비디오',
@@ -39,14 +39,14 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'ko_KR',
-    url: 'https://conference-view.com',
+    url: 'https://conference-view.vercel.app',
     siteName: '컨퍼런스 비디오',
     title: '컨퍼런스 비디오 | 개발 컨퍼런스 발표 영상 모음',
     description:
       'FEConf, NDC, if(kakao) 등 다양한 개발 컨퍼런스의 발표 영상을 연도, 컨퍼런스, 개발언어, 직군별로 필터링하여 볼 수 있습니다.',
     images: [
       {
-        url: 'https://conference-view.com/og-image.png',
+        url: 'https://conference-view.vercel.app/og-image.png',
         width: 1200,
         height: 630,
         alt: '컨퍼런스 비디오',
@@ -58,7 +58,7 @@ export const metadata: Metadata = {
     title: '컨퍼런스 비디오 | 개발 컨퍼런스 발표 영상 모음',
     description:
       'FEConf, NDC, if(kakao) 등 다양한 개발 컨퍼런스의 발표 영상을 필터링하여 볼 수 있습니다.',
-    images: ['https://conference-view.com/og-image.png'],
+    images: ['https://conference-view.vercel.app/og-image.png'],
   },
   robots: {
     index: true,
@@ -97,7 +97,7 @@ export default function RootLayout({
               '@type': 'WebApplication',
               name: '컨퍼런스 비디오',
               description: '개발 컨퍼런스 발표 영상 모음',
-              url: 'https://conference-view.com',
+              url: 'https://conference-view.vercel.app',
               applicationCategory: 'EducationalApplication',
             }),
           }}
@@ -115,11 +115,11 @@ export default function RootLayout({
         {/* OG 이미지 메타 태그 명시적 추가 */}
         <meta
           property="og:image"
-          content="https://conference-view.com/og-image.png"
+          content="https://conference-view.vercel.app/og-image.png"
         />
         <meta
           property="og:image:secure_url"
-          content="https://conference-view.com/og-image.png"
+          content="https://conference-view.vercel.app/og-image.png"
         />
         <meta property="og:image:type" content="image/png" />
         <meta property="og:image:width" content="1200" />
@@ -129,11 +129,11 @@ export default function RootLayout({
         {/* Twitter Card 이미지 */}
         <meta
           name="twitter:image"
-          content="https://conference-view.com/og-image.png"
+          content="https://conference-view.vercel.app/og-image.png"
         />
         <meta
           name="twitter:image:src"
-          content="https://conference-view.com/og-image.png"
+          content="https://conference-view.vercel.app/og-image.png"
         />
 
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
