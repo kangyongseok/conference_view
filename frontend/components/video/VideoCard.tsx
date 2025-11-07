@@ -57,6 +57,10 @@ const VideoCard = ({
   const { isFavorite } = useFavorites();
   const isFavorited = isFavorite(youtubeId);
 
+  const isYouTubeThumbnail =
+    thumbnailUrl?.includes('img.youtube.com') ||
+    thumbnailUrl?.includes('i.ytimg.com');
+
   // 화면 크기 감지 (모바일/PC 구분)
   useEffect(() => {
     const checkMobile = () => {
@@ -209,7 +213,9 @@ const VideoCard = ({
               className="object-cover transition-transform group-hover:scale-105"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               priority={priority}
-              // priority={true}일 때 자동으로 fetchpriority="high"와 loading="eager"가 적용됩니다
+              unoptimized={
+                isYouTubeThumbnail || thumbnailUrl?.startsWith('http')
+              }
             />
             {/* 즐겨찾기 뱃지 (좌상단) */}
             {isFavorited && (
