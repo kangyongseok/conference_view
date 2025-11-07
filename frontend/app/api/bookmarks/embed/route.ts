@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { unstable_cache } from 'next/cache';
+import { AppError, handleError } from '@/lib/utils/errors';
 
 // 캐시된 fetchEmbedData 함수
 const getCachedEmbedData = unstable_cache(
@@ -18,7 +19,10 @@ export async function GET(request: NextRequest) {
   const url = searchParams.get('url');
 
   if (!url) {
-    return NextResponse.json({ error: 'URL이 필요합니다.' }, { status: 400 });
+    return NextResponse.json(
+      { error: 'URL이 필요합니다.' },
+      { status: 400 }
+    );
   }
 
   try {
@@ -34,6 +38,8 @@ export async function GET(request: NextRequest) {
     return response;
   } catch (error) {
     console.error('Embed fetch error:', error);
+    
+    // 에러가 발생해도 기본값 반환 (북마크 생성은 가능하도록)
     return NextResponse.json(
       {
         title: null,
@@ -41,7 +47,7 @@ export async function GET(request: NextRequest) {
         thumbnail_url: null,
         html: null,
       },
-      { status: 200 } // 실패해도 기본값 반환
+      { status: 200 }
     );
   }
 }

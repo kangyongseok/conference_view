@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useAnalytics } from '../hooks/useAnalytics';
+import { useAnalytics } from '@/hooks/useAnalytics';
 
 export const AuthButton = () => {
   const { logLogout } = useAnalytics();

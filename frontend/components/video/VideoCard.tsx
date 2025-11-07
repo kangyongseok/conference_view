@@ -3,14 +3,14 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
-import VideoPlayer from '@/components/VideoPlayer';
+import VideoPlayer from './VideoPlayer';
+import { VideoNotePanel } from './VideoNotePanel';
 import { Button } from '@/components/ui/button';
-import FavoriteButton from '@/components/FavoriteButton';
+import { FavoriteButton } from '@/components/favorite';
 import { ExternalLink, X, Maximize2, Star, FileText } from 'lucide-react';
 import { cn, getConferenceColor } from '@/lib/utils';
-import { useAnalytics } from '../hooks/useAnalytics';
+import { useAnalytics } from '@/hooks/useAnalytics';
 import { useFavorites } from '@/contexts/FavoritesContext';
-import { VideoNotePanel } from '@/components/VideoNotePanel';
 
 interface VideoCardProps {
   youtubeId: string;

@@ -12,8 +12,8 @@ import {
   addFavorite,
   removeFavorite,
   fetchUserFavorites,
-} from '@/lib/supabase/queries';
-import { invalidateFavoriteCache } from '@/lib/supabase/queries';
+  invalidateFavoriteCache,
+} from '@/lib/supabase';
 
 interface FavoritesContextType {
   favorites: string[]; // youtube_id 배열

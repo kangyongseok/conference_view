@@ -6,7 +6,7 @@ import { Heart } from 'lucide-react';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
-import { useAnalytics } from '../hooks/useAnalytics';
+import { useAnalytics } from '@/hooks/useAnalytics';
 
 interface FavoriteButtonProps {
   youtubeId: string;

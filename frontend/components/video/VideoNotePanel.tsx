@@ -8,7 +8,7 @@ import {
   saveVideoNote,
   deleteVideoNote,
   fetchVideoNote,
-} from '@/lib/supabase/queries';
+} from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import ReactMarkdown from 'react-markdown';
 import { cn } from '@/lib/utils';

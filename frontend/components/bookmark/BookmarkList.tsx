@@ -2,8 +2,8 @@
 
 import { memo } from 'react';
 import { Loader2, Bookmark } from 'lucide-react';
-import { BookmarkCard } from '@/components/BookmarkCard';
-import type { Bookmark as BookmarkType } from '@/lib/supabase/queries';
+import { BookmarkCard } from './BookmarkCard';
+import type { Bookmark as BookmarkType } from '@/lib/supabase';
 
 interface BookmarkListProps {
   bookmarks: BookmarkType[];

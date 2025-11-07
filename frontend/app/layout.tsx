@@ -80,7 +80,8 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+  // 환경 변수는 서버 컴포넌트에서 직접 접근 (NEXT_PUBLIC_ 접두사는 클라이언트에서도 접근 가능)
+  const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || process.env.NEXT_PUBLIC_GA_ID;
   const isDevelopment = process.env.NODE_ENV === 'development';
 
   return (

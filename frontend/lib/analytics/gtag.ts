@@ -1,8 +1,9 @@
 'use client';
 
+import { env } from '@/lib/config/env';
+
 // Google Analytics 측정 ID (환경 변수에서 가져옴)
-export const GA_MEASUREMENT_ID =
-  process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || '';
+export const GA_MEASUREMENT_ID = env.NEXT_PUBLIC_GA_ID || '';
 
 const isDevelopment = process.env.NODE_ENV === 'development';
 

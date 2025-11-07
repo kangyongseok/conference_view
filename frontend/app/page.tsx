@@ -1,10 +1,9 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import VideoCard from '@/components/VideoCard';
+import { VideoCard, VideoFilters, VideoPlayer } from '@/components/video';
 import { ThemeToggle } from '@/components/ThemeToggle';
-import VideoFilters from '@/components/VideoFilters';
-import VideoPlayer from '@/components/VideoPlayer';
+import { Navigation } from '@/components/layout';
 import { Button } from '@/components/ui/button';
 import {
   ExternalLink,
@@ -18,12 +17,12 @@ import {
 import { cn, getConferenceColor } from '@/lib/utils';
 import { AuthButton } from '@/components/AuthButton';
 import { useInfiniteVideos } from '@/hooks/useInfiniteVideos';
-import { fetchFilterOptions } from '@/lib/supabase/queries';
+import { fetchFilterOptions } from '@/lib/supabase';
 import Link from 'next/link';
 import { Star } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
-import { useAnalytics } from '../hooks/useAnalytics';
-import { VideoNotePanel } from '@/components/VideoNotePanel';
+import { useAuth } from '@/contexts/AuthContext';
+import { useAnalytics } from '@/hooks/useAnalytics';
+import { VideoNotePanel } from '@/components/video';
 
 export interface FilterState {
   year: string[];
@@ -206,45 +205,12 @@ export default function Home() {
           <div className="container mx-auto p-4 lg:p-6">
             <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <h1 className="text-2xl font-bold sm:text-3xl">비디오 목록</h1>
-              <div className="flex items-center gap-4">
-                {selectedVideoData && !videoPlayerState?.isFullscreen && (
-                  <div className="hidden text-sm text-muted-foreground lg:block">
-                    총 {total}개 비디오
-                  </div>
-                )}
-                {user && (
-                  <>
-                    <Link href="/favorites">
-                      <Button variant="ghost" size="sm" className="gap-2">
-                        <Star className="h-4 w-4" />
-                        <span className="hidden sm:inline">즐겨찾기</span>
-                      </Button>
-                    </Link>
-                    <Link href="/bookmarks">
-                      <Button variant="ghost" size="sm" className="gap-2">
-                        <Bookmark className="h-4 w-4" />
-                        <span className="hidden sm:inline">북마크</span>
-                      </Button>
-                    </Link>
-                  </>
-                )}
-                {!user && (
-                  <>
-                    <Link href="/bookmarks">
-                      <Button variant="ghost" size="sm" className="gap-2">
-                        <Bookmark className="h-4 w-4" />
-                        <span className="hidden sm:inline">북마크</span>
-                      </Button>
-                    </Link>
-                    <div className="hidden items-center gap-2 text-sm text-muted-foreground sm:flex">
-                      <FileText className="h-4 w-4" />
-                      <span>로그인하면 영상 보며 메모 작성 가능</span>
-                    </div>
-                  </>
-                )}
-                <AuthButton />
-                <ThemeToggle />
-              </div>
+              <Navigation
+                showVideoCount={
+                  !!(selectedVideoData && !videoPlayerState?.isFullscreen)
+                }
+                videoCount={total}
+              />
             </header>
 
             <div className="flex flex-col gap-6 lg:flex-row lg:items-start">

@@ -15,7 +15,7 @@ import {
   Save,
   Link as LinkIcon,
 } from 'lucide-react';
-import type { Bookmark } from '@/lib/supabase/queries';
+import type { Bookmark } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 import { useAnalytics } from '@/hooks/useAnalytics';
 

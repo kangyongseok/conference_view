@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   fetchVideos,
-  fetchFavoriteVideos, // 추가
+  fetchFavoriteVideos,
   type Video,
   type FilterOptions,
   type PaginationOptions,
-} from '@/lib/supabase/queries';
+} from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface UseInfiniteVideosOptions {
