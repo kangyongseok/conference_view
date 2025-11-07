@@ -13,3 +13,4 @@ public/static/
 /coverage/
 *.local
 *.log
+docs/screenshots/*.png
