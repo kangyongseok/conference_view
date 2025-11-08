@@ -5,6 +5,7 @@ import { ThemeProvider } from '@/components/ThemeProvider';
 import { AuthProvider } from '../contexts/AuthContext';
 import { FavoritesProvider } from '@/contexts/FavoritesContext';
 import Script from 'next/script';
+import Clarity from '@microsoft/clarity';
 
 const notoSansKR = Noto_Sans_KR({
   variable: '--font-noto-sans-kr',
@@ -85,6 +86,10 @@ export default function RootLayout({
   const GA_MEASUREMENT_ID =
     process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || process.env.NEXT_PUBLIC_GA_ID;
   const isDevelopment = process.env.NODE_ENV === 'development';
+
+  const projectId = process.env.NEXT_PUBLIC_CLARITY;
+
+  Clarity.init(projectId || '');
 
   return (
     <html lang="ko" suppressHydrationWarning>
