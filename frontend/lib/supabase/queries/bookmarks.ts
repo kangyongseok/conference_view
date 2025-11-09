@@ -175,10 +175,20 @@ export const updateBookmark = async (
 ): Promise<Bookmark> => {
   const supabase = createClient();
 
+  // 현재 세션의 사용자 ID 가져오기
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error('로그인이 필요합니다.');
+  }
+
   const { data, error } = await supabase
     .from('bookmarks')
     .update(updates)
     .eq('id', bookmarkId)
+    .eq('user_id', user.id) // 현재 사용자 ID로 필터링
     .select()
     .single();
 
@@ -197,10 +207,20 @@ export const updateBookmark = async (
 export const deleteBookmark = async (bookmarkId: number): Promise<void> => {
   const supabase = createClient();
 
+  // 현재 세션의 사용자 ID 가져오기
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error('로그인이 필요합니다.');
+  }
+
   const { error } = await supabase
     .from('bookmarks')
     .delete()
-    .eq('id', bookmarkId);
+    .eq('id', bookmarkId)
+    .eq('user_id', user.id); // 현재 사용자 ID로 필터링
 
   if (error) {
     throw handleSupabaseError(error, '북마크 삭제에 실패했습니다.');
@@ -246,4 +266,3 @@ export const fetchUserTags = async (userId: string): Promise<string[]> => {
 
   return result;
 };
-

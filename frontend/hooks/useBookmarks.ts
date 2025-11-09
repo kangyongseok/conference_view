@@ -123,6 +123,10 @@ export const useBookmarks = (options: UseBookmarksOptions = {}) => {
   // 북마크 삭제
   const removeBookmark = useCallback(
     async (bookmarkId: number) => {
+      if (!user) {
+        throw new Error('로그인이 필요합니다.');
+      }
+
       try {
         await deleteBookmark(bookmarkId);
         setBookmarks((prev) => prev.filter((b) => b.id !== bookmarkId));
@@ -133,12 +137,16 @@ export const useBookmarks = (options: UseBookmarksOptions = {}) => {
         throw error;
       }
     },
-    [loadTags]
+    [user, loadTags]
   );
 
   // 태그 업데이트
   const updateTags = useCallback(
     async (bookmarkId: number, newTags: string[]) => {
+      if (!user) {
+        throw new Error('로그인이 필요합니다.');
+      }
+
       try {
         await updateBookmark(bookmarkId, { tags: newTags });
         setBookmarks((prev) =>
@@ -150,7 +158,7 @@ export const useBookmarks = (options: UseBookmarksOptions = {}) => {
         throw error;
       }
     },
-    [loadTags]
+    [user, loadTags]
   );
 
   // 태그 선택
@@ -204,4 +212,3 @@ export const useBookmarks = (options: UseBookmarksOptions = {}) => {
     lastElementRef,
   };
 };
-
