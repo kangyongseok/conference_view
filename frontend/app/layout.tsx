@@ -19,20 +19,30 @@ const outfit = Outfit({
 export const metadata: Metadata = {
   metadataBase: new URL('https://conference-view.vercel.app'),
   title: {
-    default: '컨퍼런스 비디오 | 개발 컨퍼런스 발표 영상 모음',
-    template: '%s | 컨퍼런스 비디오',
+    default: '테크 컨퍼런스 영상 모음 | FEConf, NDC, if(kakao) 발표 영상',
+    template: '%s | 테크 컨퍼런스 영상',
   },
   description:
-    'FEConf, NDC, if(kakao) 등 다양한 개발 컨퍼런스의 발표 영상을 연도, 컨퍼런스, 개발언어, 직군별로 필터링하여 볼 수 있습니다.',
+    'FEConf, NDC, if(kakao), 당근테크, 채널톡 등 국내 주요 테크 컨퍼런스 발표 영상을 연도, 컨퍼런스, 개발언어, 직군별로 필터링하여 무료로 시청하세요.',
   keywords: [
-    '컨퍼런스',
-    '개발 컨퍼런스',
+    '테크 컨퍼런스',
+    '개발자 컨퍼런스',
     'FEConf',
+    'FEConf 2024',
+    'FEConf 2025',
     'NDC',
-    '프론트엔드',
-    '백엔드',
-    '개발 발표',
-    '프로그래밍',
+    'NDC 2024',
+    'NDC 2025',
+    'if kakao',
+    'if(kakao)',
+    '당근테크',
+    '채널톡 컨퍼런스',
+    '프론트엔드 컨퍼런스',
+    '백엔드 컨퍼런스',
+    '개발 발표 영상',
+    '프로그래밍 컨퍼런스',
+    '테크톡',
+    '기술 컨퍼런스',
   ],
   authors: [{ name: 'Conference View' }],
   creator: 'Conference View',
@@ -40,24 +50,24 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'ko_KR',
     url: 'https://conference-view.vercel.app',
-    siteName: '컨퍼런스 비디오',
-    title: '컨퍼런스 비디오 | 개발 컨퍼런스 발표 영상 모음',
+    siteName: '테크 컨퍼런스 영상',
+    title: '테크 컨퍼런스 영상 모음 | FEConf, NDC, if(kakao) 발표 영상',
     description:
-      'FEConf, NDC, if(kakao) 등 다양한 개발 컨퍼런스의 발표 영상을 연도, 컨퍼런스, 개발언어, 직군별로 필터링하여 볼 수 있습니다.',
+      'FEConf, NDC, if(kakao), 당근테크, 채널톡 등 국내 주요 테크 컨퍼런스 발표 영상을 연도, 컨퍼런스, 개발언어, 직군별로 필터링하여 무료로 시청하세요.',
     images: [
       {
         url: 'https://conference-view.vercel.app/og-image.png',
         width: 1200,
         height: 630,
-        alt: '컨퍼런스 비디오',
+        alt: '테크 컨퍼런스 영상 - FEConf, NDC, if(kakao)',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: '컨퍼런스 비디오 | 개발 컨퍼런스 발표 영상 모음',
+    title: '테크 컨퍼런스 영상 모음 | FEConf, NDC, if(kakao)',
     description:
-      'FEConf, NDC, if(kakao) 등 다양한 개발 컨퍼런스의 발표 영상을 필터링하여 볼 수 있습니다.',
+      'FEConf, NDC, if(kakao), 당근테크, 채널톡 등 국내 주요 테크 컨퍼런스 발표 영상을 무료로 시청하세요.',
     images: ['https://conference-view.vercel.app/og-image.png'],
   },
   robots: {
@@ -72,7 +82,10 @@ export const metadata: Metadata = {
     },
   },
   alternates: {
-    canonical: 'https://conference-view.com',
+    canonical: 'https://conference-view.vercel.app',
+    types: {
+      'application/rss+xml': [{ url: '/sitemap.xml', title: 'Sitemap' }],
+    },
   },
 };
 
@@ -95,11 +108,19 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               '@context': 'https://schema.org',
-              '@type': 'WebApplication',
-              name: '컨퍼런스 비디오',
-              description: '개발 컨퍼런스 발표 영상 모음',
+              '@type': 'CollectionPage',
+              name: '테크 컨퍼런스 영상',
+              description:
+                'FEConf, NDC, if(kakao) 등 국내 주요 테크 컨퍼런스 발표 영상 모음',
               url: 'https://conference-view.vercel.app',
-              applicationCategory: 'EducationalApplication',
+              mainEntity: {
+                '@type': 'ItemList',
+                itemListElement: {
+                  '@type': 'ListItem',
+                  position: 1,
+                  name: '테크 컨퍼런스 영상 모음',
+                },
+              },
             }),
           }}
         />
@@ -124,6 +145,14 @@ export default function RootLayout({
         <meta name="format-detection" content="telephone=no" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta
+          name="naver-site-verification"
+          content="baeb524cf7dbc8ae25b17f9e48b7c24ec171ac3b"
+        />
+        <meta
+          name="google-site-verification"
+          content="LdxUzJqenFfAbuY1sPp65G-xtO_J9CAw_L8hZPwogNs"
+        />
         <meta
           name="apple-mobile-web-app-status-bar-style"
           content="black-translucent"
