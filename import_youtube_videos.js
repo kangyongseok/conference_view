@@ -350,15 +350,26 @@ function extractSpeakerInfoByConference(title, description, conference_name) {
  💾 Supabase 저장
 ---------------------------------------- */
 async function saveToSupabase(videos) {
-  const { data, error } = await supabase.from('videos').upsert(videos, {
+  // youtube_id 기준으로 중복 제거 - 마지막 항목 유지
+  const uniqueVideos = Array.from(
+    new Map(videos.map((v) => [v.youtube_id, v])).values()
+  );
+
+  if (uniqueVideos.length < videos.length) {
+    console.log(`⚠️ 중복 제거: ${videos.length}개 → ${uniqueVideos.length}개`);
+  }
+
+  const { data, error } = await supabase.from('videos').upsert(uniqueVideos, {
     onConflict: 'youtube_id',
-    returning: 'representation', // 👈 삽입된 row 반환하도록 설정
+    returning: 'representation',
   });
 
   if (error) {
     console.error('❌ DB 저장 실패:', error);
   } else {
-    console.log(`✅ ${data ? data.length : videos.length}개 영상 저장 완료`);
+    console.log(
+      `✅ ${data ? data.length : uniqueVideos.length}개 영상 저장 완료`
+    );
   }
 }
 
