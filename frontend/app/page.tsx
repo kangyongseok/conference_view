@@ -23,6 +23,7 @@ import { Star } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { VideoNotePanel } from '@/components/video';
+import { useSearchParams } from 'next/navigation';
 
 export interface FilterState {
   year: string[];
@@ -191,6 +192,19 @@ export default function Home() {
       isFullscreen: !videoPlayerState?.isFullscreen,
     });
   };
+
+  const searchParams = useSearchParams();
+
+  // URL 파라미터에서 비디오 ID 가져오기
+  useEffect(() => {
+    const videoId = searchParams.get('video');
+    if (videoId) {
+      // 비디오를 전체화면 모드로 자동 재생
+      setVideoPlayerState({ videoId, isFullscreen: true });
+      // URL에서 파라미터 제거 (선택사항)
+      window.history.replaceState({}, '', '/');
+    }
+  }, [searchParams]);
 
   return (
     <>
@@ -513,7 +527,7 @@ export default function Home() {
             </div>
 
             <div className="flex-1 flex items-center justify-center p-4 bg-muted/30">
-              <div className="w-full max-w-7xl">
+              <div className="w-full max-w-[calc(100%-700px)]">
                 <VideoPlayer
                   youtubeId={selectedVideoData.youtube_id}
                   autoplay={true}

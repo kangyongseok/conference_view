@@ -42,6 +42,12 @@ export const Navigation = ({
               <span className="hidden sm:inline">북마크</span>
             </Button>
           </Link>
+          <Link href="/notes">
+            <Button variant="ghost" size="sm" className="gap-2">
+              <FileText className="h-4 w-4" />
+              <span className="hidden sm:inline">메모</span>
+            </Button>
+          </Link>
         </>
       )}
       {!user && (
@@ -64,4 +70,3 @@ export const Navigation = ({
     </div>
   );
 };
-

@@ -2,7 +2,7 @@
 
 import { createClient } from '../client';
 import { cache } from '@/lib/cache/cache';
-import type { VideoNote } from '../types';
+import type { Video, VideoNote } from '../types';
 import { CACHE_TTL } from '@/lib/constants';
 
 // 메모 조회 - 캐싱 적용
@@ -122,3 +122,57 @@ export const deleteVideoNote = async (
   cache.delete(cacheKey);
 };
 
+// 사용자의 모든 메모 조회 (비디오 정보 포함)
+export const fetchUserNotes = async (
+  userId: string
+): Promise<Array<VideoNote & { video: Video | null }>> => {
+  const supabase = createClient();
+
+  // 1. 먼저 사용자의 모든 메모 조회
+  const { data: notes, error: notesError } = await supabase
+    .from('video_notes')
+    .select('*')
+    .eq('user_id', userId)
+    .order('updated_at', { ascending: false });
+
+  if (notesError) {
+    console.error('메모 목록 조회 오류:', notesError);
+    throw notesError;
+  }
+
+  if (!notes || notes.length === 0) {
+    return [];
+  }
+
+  // 2. 고유한 youtube_id 목록 추출
+  const youtubeIds = Array.from(
+    new Set(notes.map((note) => note.youtube_id))
+  ).filter((id): id is string => id !== null && id !== undefined);
+
+  if (youtubeIds.length === 0) {
+    return notes.map((note) => ({ ...note, video: null }));
+  }
+
+  // 3. 모든 비디오 정보를 한 번에 조회
+  const { data: videos, error: videosError } = await supabase
+    .from('videos')
+    .select('*')
+    .in('youtube_id', youtubeIds);
+
+  if (videosError) {
+    console.error('비디오 정보 조회 오류:', videosError);
+    // 비디오 조회 실패해도 메모는 반환
+  }
+
+  // 4. youtube_id를 키로 하는 비디오 맵 생성
+  const videoMap = new Map<string, Video>();
+  (videos || []).forEach((video) => {
+    videoMap.set(video.youtube_id, video);
+  });
+
+  // 5. 메모와 비디오 정보 결합
+  return notes.map((note) => ({
+    ...note,
+    video: videoMap.get(note.youtube_id) || null,
+  }));
+};
