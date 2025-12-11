@@ -9,7 +9,10 @@ import { CACHE_TTL, PAGINATION } from '@/lib/constants';
 // 비디오 목록 조회 (페이지네이션) - 캐싱 적용
 export const fetchVideos = async (
   filters: FilterOptions = {},
-  pagination: PaginationOptions = { page: 1, pageSize: PAGINATION.DEFAULT_PAGE_SIZE }
+  pagination: PaginationOptions = {
+    page: 1,
+    pageSize: PAGINATION.DEFAULT_PAGE_SIZE,
+  }
 ): Promise<{ data: Video[]; total: number }> => {
   // 캐시 키 생성
   const cacheKey = cache.generateKey('videos', { filters, pagination });
@@ -48,13 +51,16 @@ export const fetchVideos = async (
   // 개발언어 필터 적용 (대소문자 무시)
   let filteredData = data || [];
   let filteredTotal = count || 0;
-  
+
   if (programmingLanguageFilter && programmingLanguageFilter.length > 0) {
     const normalizedFilters = programmingLanguageFilter.map((lang) =>
       lang.toLowerCase()
     );
     filteredData = filteredData.filter((video) => {
-      if (!video.programming_languages || video.programming_languages.length === 0) {
+      if (
+        !video.programming_languages ||
+        video.programming_languages.length === 0
+      ) {
         return false;
       }
       const videoLanguages = video.programming_languages.map((lang: string) =>
@@ -64,7 +70,7 @@ export const fetchVideos = async (
         videoLanguages.includes(filterLang)
       );
     });
-    
+
     // total count는 클라이언트 측 필터링 후의 실제 개수로 조정
     // 정확한 total을 얻으려면 전체 데이터를 조회해야 하지만, 성능을 위해 현재 페이지의 필터링된 개수만 사용
     // 실제로는 전체 데이터를 조회하지 않고도 정확한 count를 얻을 수 없으므로,
@@ -87,14 +93,8 @@ export const fetchVideos = async (
 export const fetchVideoById = async (
   youtubeId: string
 ): Promise<Video | null> => {
-  const cacheKey = cache.generateKey('video', { youtubeId });
-
-  const cached = cache.get<Video>(cacheKey);
-  if (cached) {
-    return cached;
-  }
-
   const supabase = createClient();
+
   const { data, error } = await supabase
     .from('videos')
     .select('*')
@@ -102,13 +102,11 @@ export const fetchVideoById = async (
     .single();
 
   if (error) {
+    if (error.code === 'PGRST116') {
+      return null;
+    }
     console.error('비디오 조회 오류:', error);
-    return null;
-  }
-
-  // 캐시 저장
-  if (data) {
-    cache.set(cacheKey, data, CACHE_TTL.VIDEO_DETAIL);
+    throw error;
   }
 
   return data;
@@ -395,4 +393,3 @@ export const syncFilterOptionsFromVideos = async (): Promise<void> => {
   // 캐시 무효화
   cache.delete('filterOptions');
 };
-

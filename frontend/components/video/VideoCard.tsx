@@ -4,13 +4,13 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
 import VideoPlayer from './VideoPlayer';
-import { VideoNotePanel } from './VideoNotePanel';
 import { Button } from '@/components/ui/button';
 import { FavoriteButton } from '@/components/favorite';
-import { ExternalLink, X, Maximize2, Star, FileText } from 'lucide-react';
+import { ExternalLink, X, Star, FileText } from 'lucide-react';
 import { cn, getConferenceColor } from '@/lib/utils';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { useFavorites } from '@/contexts/FavoritesContext';
+import { useRouter } from 'next/navigation';
 
 interface VideoCardProps {
   youtubeId: string;
@@ -56,6 +56,7 @@ const VideoCard = ({
   const { logVideoPlayStart, logVideoOpenYouTube } = useAnalytics();
   const { isFavorite } = useFavorites();
   const isFavorited = isFavorite(youtubeId);
+  const router = useRouter();
 
   const isYouTubeThumbnail =
     thumbnailUrl?.includes('img.youtube.com') ||
@@ -130,7 +131,7 @@ const VideoCard = ({
         isFavorited && 'ring-1 ring-yellow-500/50',
         className
       )}
-      onClick={!isPlaying ? handleClick : undefined}
+      onClick={() => router.push(`/videos/${youtubeId}`)}
     >
       {/* 썸네일 또는 비디오 플레이어 */}
       <div className="relative aspect-video w-full overflow-hidden bg-muted">

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { cn } from '@/lib/utils';
 
 interface VideoPlayerProps {
   youtubeId: string;
@@ -31,8 +32,19 @@ const VideoPlayer = ({
     }
   }, [autoplay]);
 
+  // className에 h-full이 포함되어 있으면 높이를 채우고, 없으면 aspect-ratio 유지
+  const hasFullHeight = className?.includes('h-full');
+
   return (
-    <div className={className} role="region" aria-label="비디오 플레이어">
+    <div
+      className={cn(
+        'relative w-full',
+        hasFullHeight ? 'h-full' : 'aspect-video',
+        className
+      )}
+      role="region"
+      aria-label="비디오 플레이어"
+    >
       <iframe
         ref={iframeRef}
         width="100%"
@@ -43,7 +55,7 @@ const VideoPlayer = ({
         title={title}
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
         allowFullScreen
-        className="aspect-video w-full rounded-lg"
+        className="absolute inset-0 h-full w-full rounded-lg"
         aria-label={`${title} YouTube 비디오 플레이어`}
       />
     </div>
