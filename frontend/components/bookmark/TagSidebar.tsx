@@ -46,13 +46,13 @@ export const TagSidebar = ({
                   key={tag}
                   variant={isSelected ? 'default' : 'secondary'}
                   className={cn(
-                    'cursor-pointer transition-all hover:scale-105 text-[10px]',
+                    'max-w-full cursor-pointer transition-all hover:scale-105 text-[10px]',
                     isSelected && 'ring-2 ring-primary ring-offset-2'
                   )}
                   onClick={() => onTagSelect(tag)}
                 >
-                  <Tag className="mr-1 h-3 w-3" />
-                  {tag}
+                  <Tag className="mr-1 h-3 w-3 shrink-0" />
+                  <span className="truncate">{tag}</span>
                 </Badge>
               );
             })}

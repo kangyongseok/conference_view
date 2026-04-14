@@ -18,6 +18,7 @@ import {
   Clock,
   Calendar,
   ArrowUpDown,
+  Mail,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
@@ -554,6 +555,20 @@ const VideoFilters = ({
             필터 초기화 ({activeFilterCount})
           </Button>
         )}
+
+        {/* 문의 및 버그 제보 */}
+        <div className="hidden border-t pt-3 lg:block">
+          <p className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            문의 / 버그 제보
+          </p>
+          <a
+            href="mailto:kangyongsuek@gmail.com"
+            className="flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <Mail className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+            <span className="break-all">kangyongsuek@gmail.com</span>
+          </a>
+        </div>
       </div>
     </div>
   );
