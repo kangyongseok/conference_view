@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, Suspense } from 'react';
 import { VideoCard, VideoFilters, VideoPlayer } from '@/components/video';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Navigation } from '@/components/layout';
@@ -33,7 +33,7 @@ export interface FilterState {
   sortBy: string;
 }
 
-export default function Home() {
+function HomeContent() {
   const { logFilterApply, logFullscreenEnter, logFullscreenExit } =
     useAnalytics();
   const [filters, setFilters] = useState<FilterState>({
@@ -578,5 +578,19 @@ export default function Home() {
         )}
       </div>
     </>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex h-screen items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      }
+    >
+      <HomeContent />
+    </Suspense>
   );
 }
