@@ -6,20 +6,57 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import {
-  X,
-  Tag,
-  Edit2,
-  Trash2,
-  Save,
-  Link as LinkIcon,
-  Folder,
-} from 'lucide-react';
+import { X, Tag, Edit2, Trash2, Save, Folder } from 'lucide-react';
 import type { Bookmark } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { BOOKMARK_CATEGORIES } from '@/lib/constants';
 import type { BookmarkViewMode } from '@/hooks/useBookmarkViewMode';
+
+const getHostname = (url: string): string | null => {
+  try {
+    const u = new URL(url);
+    return u.hostname.replace(/^www\./, '');
+  } catch {
+    return null;
+  }
+};
+
+const getDomainInitial = (
+  url: string,
+  fallbackTitle: string | null
+): string => {
+  const host = getHostname(url);
+  if (!host) return (fallbackTitle?.[0] ?? '?').toUpperCase();
+  const name = host.split('.')[0] ?? '';
+  if (!name) return (fallbackTitle?.[0] ?? '?').toUpperCase();
+  const isLong = name.length >= 7;
+  return isLong
+    ? name[0]!.toUpperCase() + name[1]!.toLowerCase()
+    : name[0]!.toUpperCase();
+};
+
+const BANNER_PALETTE = [
+  'bg-emerald-400',
+  'bg-violet-400',
+  'bg-cyan-400',
+  'bg-pink-400',
+  'bg-rose-400',
+  'bg-neutral-900',
+  'bg-neutral-200',
+  'bg-amber-400',
+  'bg-sky-400',
+  'bg-lime-400',
+];
+
+const getBrandColor = (url: string): string => {
+  const key = getHostname(url) ?? url;
+  let hash = 0;
+  for (let i = 0; i < key.length; i++) {
+    hash = (hash * 31 + key.charCodeAt(i)) >>> 0;
+  }
+  return BANNER_PALETTE[hash % BANNER_PALETTE.length]!;
+};
 
 interface BookmarkCardProps {
   bookmark: Bookmark;
@@ -154,20 +191,14 @@ export const BookmarkCard = ({
   ) : shouldShowPlaceholder ? (
     <div
       className={cn(
-        'flex aspect-video items-center justify-center bg-muted p-4',
+        'flex aspect-video items-center justify-center overflow-hidden',
+        getBrandColor(bookmark.url),
         isList ? 'w-full sm:w-64 sm:shrink-0' : 'w-full'
       )}
     >
-      {bookmark.title ? (
-        <h3 className="line-clamp-3 text-center text-sm font-semibold text-muted-foreground">
-          {bookmark.title}
-        </h3>
-      ) : (
-        <div className="flex flex-col items-center gap-2 text-muted-foreground">
-          <LinkIcon className="h-8 w-8" />
-          <span className="text-xs">북마크</span>
-        </div>
-      )}
+      <span className="text-6xl font-bold text-black/80 sm:text-7xl">
+        {getDomainInitial(bookmark.url, bookmark.title)}
+      </span>
     </div>
   ) : null;
 
@@ -193,8 +224,24 @@ export const BookmarkCard = ({
         {mediaBlock}
 
         <div className={cn('p-4', isList && 'flex-1 min-w-0')}>
+          {/* 파비콘 + 도메인 */}
+          {getHostname(bookmark.url) && (
+            <div className="mb-2 flex items-center gap-1.5 text-xs text-muted-foreground">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={`https://www.google.com/s2/favicons?domain=${getHostname(bookmark.url)}&sz=32`}
+                alt=""
+                width={16}
+                height={16}
+                className="h-4 w-4 shrink-0 rounded-sm"
+                loading="lazy"
+              />
+              <span className="truncate">{getHostname(bookmark.url)}</span>
+            </div>
+          )}
+
           {/* 제목 */}
-          {(shouldShowImage || bookmark.embed_html) && bookmark.title && (
+          {bookmark.title && (
             <h3
               className={cn(
                 'mb-2 font-semibold leading-tight',
@@ -216,17 +263,6 @@ export const BookmarkCard = ({
               {bookmark.description}
             </p>
           )}
-
-          {/* URL */}
-          <a
-            href={bookmark.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={stop}
-            className="mb-3 block truncate text-xs text-primary hover:underline"
-          >
-            {bookmark.url}
-          </a>
 
           {/* 카테고리 / 태그 */}
           <div className="mb-3">
