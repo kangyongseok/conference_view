@@ -16,8 +16,12 @@ const outfit = Outfit({
   subsets: ['latin'],
 });
 
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ?? 'https://conference-view.vercel.app';
+const OG_IMAGE_URL = `${SITE_URL}/og-image.png`;
+
 export const metadata: Metadata = {
-  metadataBase: new URL('https://conference-view.vercel.app'),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: '테크 컨퍼런스 영상 모음 | FEConf, NDC, if(kakao) 발표 영상',
     template: '%s | 테크 컨퍼런스 영상',
@@ -49,14 +53,14 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'ko_KR',
-    url: 'https://conference-view.vercel.app',
+    url: SITE_URL,
     siteName: '테크 컨퍼런스 영상',
     title: '테크 컨퍼런스 영상 모음 | FEConf, NDC, if(kakao) 발표 영상',
     description:
       'FEConf, NDC, if(kakao), 당근테크, 채널톡 등 국내 주요 테크 컨퍼런스 발표 영상을 연도, 컨퍼런스, 개발언어, 직군별로 필터링하여 무료로 시청하세요.',
     images: [
       {
-        url: 'https://conference-view.vercel.app/og-image.png',
+        url: OG_IMAGE_URL,
         width: 1200,
         height: 630,
         alt: '테크 컨퍼런스 영상 - FEConf, NDC, if(kakao)',
@@ -68,7 +72,7 @@ export const metadata: Metadata = {
     title: '테크 컨퍼런스 영상 모음 | FEConf, NDC, if(kakao)',
     description:
       'FEConf, NDC, if(kakao), 당근테크, 채널톡 등 국내 주요 테크 컨퍼런스 발표 영상을 무료로 시청하세요.',
-    images: ['https://conference-view.vercel.app/og-image.png'],
+    images: [OG_IMAGE_URL],
   },
   robots: {
     index: true,
@@ -82,7 +86,7 @@ export const metadata: Metadata = {
     },
   },
   alternates: {
-    canonical: 'https://conference-view.vercel.app',
+    canonical: SITE_URL,
     types: {
       'application/rss+xml': [{ url: '/sitemap.xml', title: 'Sitemap' }],
     },
@@ -112,7 +116,7 @@ export default function RootLayout({
               name: '테크 컨퍼런스 영상',
               description:
                 'FEConf, NDC, if(kakao) 등 국내 주요 테크 컨퍼런스 발표 영상 모음',
-              url: 'https://conference-view.vercel.app',
+              url: SITE_URL,
               mainEntity: {
                 '@type': 'ItemList',
                 itemListElement: {
@@ -157,30 +161,6 @@ export default function RootLayout({
           name="apple-mobile-web-app-status-bar-style"
           content="black-translucent"
         />
-        {/* OG 이미지 메타 태그 명시적 추가 */}
-        <meta
-          property="og:image"
-          content="https://conference-view.vercel.app/og-image.png"
-        />
-        <meta
-          property="og:image:secure_url"
-          content="https://conference-view.vercel.app/og-image.png"
-        />
-        <meta property="og:image:type" content="image/png" />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
-        <meta property="og:image:alt" content="컨퍼런스 비디오" />
-
-        {/* Twitter Card 이미지 */}
-        <meta
-          name="twitter:image"
-          content="https://conference-view.vercel.app/og-image.png"
-        />
-        <meta
-          name="twitter:image:src"
-          content="https://conference-view.vercel.app/og-image.png"
-        />
-
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         {/* Google Analytics */}
         {GA_MEASUREMENT_ID && !isDevelopment && (

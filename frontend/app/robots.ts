@@ -1,6 +1,9 @@
 import { MetadataRoute } from 'next';
 
 export default function robots(): MetadataRoute.Robots {
+  const baseUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ?? 'https://conference-view.vercel.app';
+
   return {
     rules: [
       {
@@ -14,6 +17,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ['/bookmarks', '/favorites', '/auth/'],
       },
     ],
-    sitemap: 'https://conference-view.vercel.app/sitemap.xml',
+    sitemap: `${baseUrl}/sitemap.xml`,
   };
 }
