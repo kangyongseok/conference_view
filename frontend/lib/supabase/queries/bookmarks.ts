@@ -64,7 +64,8 @@ export const checkBookmarkExists = async (
 export const createBookmark = async (
   userId: string,
   url: string,
-  tags: string[] = []
+  tags: string[] = [],
+  category: string | null = null
 ): Promise<Bookmark> => {
   const supabase = createClient();
 
@@ -87,6 +88,7 @@ export const createBookmark = async (
       thumbnail_url: embedData.thumbnail_url || null,
       embed_html: embedData.html || null,
       tags: tags || [],
+      category: category ?? null,
     })
     .select()
     .single();
@@ -107,6 +109,7 @@ export const fetchBookmarks = async (
   userId: string,
   options?: {
     tags?: string[];
+    category?: string | null;
     page?: number;
     pageSize?: number;
   }
@@ -115,6 +118,7 @@ export const fetchBookmarks = async (
   const cacheKey = cache.generateKey('bookmarks', {
     userId,
     tags: options?.tags || [],
+    category: options?.category ?? null,
     page: options?.page || 1,
     pageSize: options?.pageSize || PAGINATION.DEFAULT_PAGE_SIZE,
   });
@@ -137,6 +141,11 @@ export const fetchBookmarks = async (
   if (options?.tags && options.tags.length > 0) {
     // overlaps를 사용하여 배열이 겹치는지 확인 (OR 조건)
     query = query.overlaps('tags', options.tags);
+  }
+
+  // 카테고리 필터링 (단일 값 일치)
+  if (options?.category) {
+    query = query.eq('category', options.category);
   }
 
   // 페이지네이션
@@ -171,6 +180,7 @@ export const updateBookmark = async (
     tags?: string[];
     title?: string;
     description?: string;
+    category?: string | null;
   }
 ): Promise<Bookmark> => {
   const supabase = createClient();

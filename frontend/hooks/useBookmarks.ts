@@ -12,6 +12,7 @@ import { PAGINATION } from '@/lib/constants';
 
 interface UseBookmarksOptions {
   initialTags?: string[];
+  initialCategory?: string | null;
 }
 
 export const useBookmarks = (options: UseBookmarksOptions = {}) => {
@@ -20,6 +21,9 @@ export const useBookmarks = (options: UseBookmarksOptions = {}) => {
   const [allTags, setAllTags] = useState<string[]>([]);
   const [selectedTags, setSelectedTags] = useState<string[]>(
     options.initialTags || []
+  );
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(
+    options.initialCategory ?? null
   );
   const [loading, setLoading] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
@@ -48,6 +52,7 @@ export const useBookmarks = (options: UseBookmarksOptions = {}) => {
         const currentPage = reset ? 1 : page;
         const result = await fetchBookmarks(user.id, {
           tags: selectedTags.length > 0 ? selectedTags : undefined,
+          category: selectedCategory ?? undefined,
           page: currentPage,
           pageSize: PAGINATION.DEFAULT_PAGE_SIZE,
         });
@@ -76,7 +81,7 @@ export const useBookmarks = (options: UseBookmarksOptions = {}) => {
         isLoadingRef.current = false;
       }
     },
-    [user, selectedTags, page, hasMore]
+    [user, selectedTags, selectedCategory, page, hasMore]
   );
 
   // 태그 로드
@@ -97,18 +102,18 @@ export const useBookmarks = (options: UseBookmarksOptions = {}) => {
       loadBookmarks(true);
       loadTags();
     }
-  }, [user, selectedTags.join(',')]);
+  }, [user, selectedTags.join(','), selectedCategory]);
 
   // 북마크 추가
   const addBookmark = useCallback(
-    async (url: string, tags: string[]) => {
+    async (url: string, tags: string[], category: string | null = null) => {
       if (!user) {
         throw new Error('로그인이 필요합니다.');
       }
 
       setIsAdding(true);
       try {
-        await createBookmark(user.id, url, tags);
+        await createBookmark(user.id, url, tags, category);
         await loadBookmarks(true);
         await loadTags();
       } catch (error) {
@@ -140,25 +145,38 @@ export const useBookmarks = (options: UseBookmarksOptions = {}) => {
     [user, loadTags]
   );
 
-  // 태그 업데이트
-  const updateTags = useCallback(
-    async (bookmarkId: number, newTags: string[]) => {
+  // 북마크 필드 업데이트 (태그/카테고리 등)
+  const updateBookmarkFields = useCallback(
+    async (
+      bookmarkId: number,
+      updates: { tags?: string[]; category?: string | null }
+    ) => {
       if (!user) {
         throw new Error('로그인이 필요합니다.');
       }
 
       try {
-        await updateBookmark(bookmarkId, { tags: newTags });
+        await updateBookmark(bookmarkId, updates);
         setBookmarks((prev) =>
-          prev.map((b) => (b.id === bookmarkId ? { ...b, tags: newTags } : b))
+          prev.map((b) => (b.id === bookmarkId ? { ...b, ...updates } : b))
         );
-        await loadTags();
+        if (updates.tags) {
+          await loadTags();
+        }
       } catch (error) {
-        console.error('태그 업데이트 실패:', error);
+        console.error('북마크 업데이트 실패:', error);
         throw error;
       }
     },
     [user, loadTags]
+  );
+
+  // 태그 업데이트 (backward compat)
+  const updateTags = useCallback(
+    async (bookmarkId: number, newTags: string[]) => {
+      await updateBookmarkFields(bookmarkId, { tags: newTags });
+    },
+    [updateBookmarkFields]
   );
 
   // 태그 선택
@@ -172,8 +190,14 @@ export const useBookmarks = (options: UseBookmarksOptions = {}) => {
     });
   }, []);
 
+  // 카테고리 선택 (같은 값 재선택 시 해제)
+  const selectCategory = useCallback((category: string | null) => {
+    setSelectedCategory((prev) => (prev === category ? null : category));
+  }, []);
+
   const clearFilters = useCallback(() => {
     setSelectedTags([]);
+    setSelectedCategory(null);
   }, []);
 
   // 무한 스크롤 감지
@@ -198,6 +222,7 @@ export const useBookmarks = (options: UseBookmarksOptions = {}) => {
     bookmarks,
     allTags,
     selectedTags,
+    selectedCategory,
     loading,
     isAdding,
     total,
@@ -207,7 +232,9 @@ export const useBookmarks = (options: UseBookmarksOptions = {}) => {
     addBookmark,
     removeBookmark,
     updateTags,
+    updateBookmarkFields,
     selectTag,
+    selectCategory,
     clearFilters,
     lastElementRef,
   };

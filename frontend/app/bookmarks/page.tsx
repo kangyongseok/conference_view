@@ -4,10 +4,15 @@ import { useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { useBookmarks } from '@/hooks/useBookmarks';
+import { useBookmarkViewMode } from '@/hooks/useBookmarkViewMode';
 import { AuthButton } from '@/components/AuthButton';
 import { Bookmark, Loader2 } from 'lucide-react';
-import type { Bookmark as BookmarkType } from '@/lib/supabase';
-import { BookmarkForm, BookmarkList, TagSidebar } from '@/components/bookmark';
+import {
+  BookmarkForm,
+  BookmarkList,
+  TagSidebar,
+  ViewModeToggle,
+} from '@/components/bookmark';
 import { PageHeader, PageLayout } from '@/components/layout';
 
 export default function BookmarksPage() {
@@ -19,19 +24,22 @@ export default function BookmarksPage() {
     logBookmarkFilter,
   } = useAnalytics();
 
-  // useBookmarks 훅 사용
+  const [viewMode, setViewMode] = useBookmarkViewMode();
+
   const {
     bookmarks,
     allTags,
     selectedTags,
+    selectedCategory,
     loading,
     isAdding,
     total,
     hasMore,
     addBookmark,
     removeBookmark,
-    updateTags,
+    updateBookmarkFields,
     selectTag,
+    selectCategory,
     clearFilters,
     lastElementRef,
   } = useBookmarks();
@@ -43,21 +51,18 @@ export default function BookmarksPage() {
     }
   }, [selectedTags, user, logBookmarkFilter]);
 
-  // 북마크 추가 핸들러 (애널리틱스 로깅 추가)
   const handleAddBookmark = useCallback(
-    async (url: string, tags: string[]) => {
+    async (url: string, tags: string[], category: string | null) => {
       try {
-        await addBookmark(url, tags);
+        await addBookmark(url, tags, category);
         logBookmarkAdd(url, tags);
       } catch (error) {
-        // 에러를 다시 throw하여 BookmarkForm에서 처리하도록
         throw error;
       }
     },
     [addBookmark, logBookmarkAdd]
   );
 
-  // 북마크 삭제 핸들러 (애널리틱스 로깅 추가)
   const handleDeleteBookmark = useCallback(
     async (bookmarkId: number) => {
       if (!confirm('북마크를 삭제하시겠습니까?')) return;
@@ -76,18 +81,22 @@ export default function BookmarksPage() {
     [removeBookmark, bookmarks, logBookmarkDelete]
   );
 
-  // 태그 업데이트 핸들러 (애널리틱스 로깅 추가)
-  const handleUpdateTags = useCallback(
-    async (bookmarkId: number, newTags: string[]) => {
+  const handleUpdateFields = useCallback(
+    async (
+      bookmarkId: number,
+      updates: { tags?: string[]; category?: string | null }
+    ) => {
       try {
-        await updateTags(bookmarkId, newTags);
-        logBookmarkTagUpdate(bookmarkId, newTags);
+        await updateBookmarkFields(bookmarkId, updates);
+        if (updates.tags) {
+          logBookmarkTagUpdate(bookmarkId, updates.tags);
+        }
       } catch (error) {
-        console.error('태그 업데이트 실패:', error);
-        alert('태그 업데이트에 실패했습니다.');
+        console.error('북마크 업데이트 실패:', error);
+        alert('북마크 업데이트에 실패했습니다.');
       }
     },
-    [updateTags, logBookmarkTagUpdate]
+    [updateBookmarkFields, logBookmarkTagUpdate]
   );
 
   if (authLoading) {
@@ -128,7 +137,9 @@ export default function BookmarksPage() {
         <TagSidebar
           tags={allTags}
           selectedTags={selectedTags}
+          selectedCategory={selectedCategory}
           onTagSelect={selectTag}
+          onCategorySelect={selectCategory}
           onClearFilters={clearFilters}
         />
       }
@@ -139,14 +150,16 @@ export default function BookmarksPage() {
         showBackButton
       />
 
-      {/* 북마크 추가 폼 */}
       <BookmarkForm
         allTags={allTags}
         onAddBookmark={handleAddBookmark}
         isAdding={isAdding}
       />
 
-      {/* 북마크 목록 */}
+      <div className="mb-4 flex items-center justify-end">
+        <ViewModeToggle viewMode={viewMode} onChange={setViewMode} />
+      </div>
+
       <BookmarkList
         bookmarks={bookmarks}
         allTags={allTags}
@@ -154,8 +167,11 @@ export default function BookmarksPage() {
         hasMore={hasMore}
         total={total}
         selectedTags={selectedTags}
+        selectedCategory={selectedCategory}
+        viewMode={viewMode}
         onDelete={handleDeleteBookmark}
-        onUpdateTags={handleUpdateTags}
+        onUpdateFields={handleUpdateFields}
+        onTagClick={selectTag}
         lastElementRef={lastElementRef}
       />
     </PageLayout>

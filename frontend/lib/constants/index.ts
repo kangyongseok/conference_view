@@ -16,3 +16,24 @@ export const CACHE_TTL = {
   VIDEO_NOTE_NULL: 1 * 60 * 1000, // 1분 (null 캐시)
 } as const;
 
+// 북마크 카테고리 (화이트리스트)
+export const BOOKMARK_CATEGORIES = [
+  '블로그',
+  '영상',
+  'JS',
+  '리액트',
+  '스타일',
+  '기술공유',
+  '백엔드',
+  'AI/ML',
+  '도구',
+  '튜토리얼',
+  '디자인',
+  '오픈소스',
+] as const;
+
+export type BookmarkCategory = (typeof BOOKMARK_CATEGORIES)[number];
+
+// 북마크 뷰 모드 localStorage 키
+export const BOOKMARK_VIEW_MODE_STORAGE_KEY = 'bookmark-view-mode';
+

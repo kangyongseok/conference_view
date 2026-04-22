@@ -7,6 +7,7 @@ export interface Bookmark {
   thumbnail_url: string | null;
   embed_html: string | null;
   tags: string[];
+  category: string | null;
   created_at: string;
   updated_at: string;
 }

@@ -4,6 +4,8 @@ import { memo } from 'react';
 import { Loader2, Bookmark } from 'lucide-react';
 import { BookmarkCard } from './BookmarkCard';
 import type { Bookmark as BookmarkType } from '@/lib/supabase';
+import { cn } from '@/lib/utils';
+import type { BookmarkViewMode } from '@/hooks/useBookmarkViewMode';
 
 interface BookmarkListProps {
   bookmarks: BookmarkType[];
@@ -12,8 +14,14 @@ interface BookmarkListProps {
   hasMore: boolean;
   total: number;
   selectedTags: string[];
+  selectedCategory: string | null;
+  viewMode: BookmarkViewMode;
   onDelete: (id: number) => void;
-  onUpdateTags: (id: number, tags: string[]) => void;
+  onUpdateFields: (
+    id: number,
+    updates: { tags?: string[]; category?: string | null }
+  ) => void;
+  onTagClick: (tag: string) => void;
   lastElementRef?: (node: HTMLElement | null) => void;
 }
 
@@ -24,8 +32,11 @@ export const BookmarkList = memo(function BookmarkList({
   hasMore,
   total,
   selectedTags,
+  selectedCategory,
+  viewMode,
   onDelete,
-  onUpdateTags,
+  onUpdateFields,
+  onTagClick,
   lastElementRef,
 }: BookmarkListProps) {
   if (loading && bookmarks.length === 0) {
@@ -37,13 +48,26 @@ export const BookmarkList = memo(function BookmarkList({
   }
 
   if (bookmarks.length > 0) {
+    const filterSummary = [
+      selectedCategory && `카테고리: ${selectedCategory}`,
+      selectedTags.length > 0 && `태그: ${selectedTags.join(', ')}`,
+    ]
+      .filter(Boolean)
+      .join(' · ');
+
     return (
       <>
         <div className="mb-4 text-sm text-muted-foreground">
           총 {total}개의 북마크
-          {selectedTags.length > 0 && ` (${selectedTags.join(', ')} 필터링)`}
+          {filterSummary && ` (${filterSummary})`}
         </div>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div
+          className={cn(
+            viewMode === 'grid'
+              ? 'grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4'
+              : 'flex flex-col gap-3'
+          )}
+        >
           {bookmarks.map((bookmark, index) => (
             <div
               key={bookmark.id}
@@ -52,8 +76,11 @@ export const BookmarkList = memo(function BookmarkList({
               <BookmarkCard
                 bookmark={bookmark}
                 allTags={allTags}
+                viewMode={viewMode}
+                selectedTags={selectedTags}
                 onDelete={onDelete}
-                onUpdateTags={onUpdateTags}
+                onUpdateFields={onUpdateFields}
+                onTagClick={onTagClick}
               />
             </div>
           ))}

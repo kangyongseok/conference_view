@@ -3,12 +3,17 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus, X, Tag, Loader2, AlertCircle } from 'lucide-react';
+import { Plus, X, Tag, Loader2, AlertCircle, Folder } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { BOOKMARK_CATEGORIES } from '@/lib/constants';
 
 interface BookmarkFormProps {
   allTags: string[];
-  onAddBookmark: (url: string, tags: string[]) => Promise<void>;
+  onAddBookmark: (
+    url: string,
+    tags: string[],
+    category: string | null
+  ) => Promise<void>;
   isAdding?: boolean;
 }
 
@@ -19,6 +24,7 @@ export const BookmarkForm = ({
 }: BookmarkFormProps) => {
   const [url, setUrl] = useState('');
   const [tags, setTags] = useState<string[]>([]);
+  const [category, setCategory] = useState<string | null>(null);
   const [tagInput, setTagInput] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
@@ -126,9 +132,10 @@ export const BookmarkForm = ({
     }
 
     try {
-      await onAddBookmark(url.trim(), tags);
+      await onAddBookmark(url.trim(), tags, category);
       setUrl('');
       setTags([]);
+      setCategory(null);
       setTagInput('');
       setError(null);
     } catch (err) {
@@ -136,7 +143,7 @@ export const BookmarkForm = ({
         err instanceof Error ? err.message : '북마크 추가에 실패했습니다.';
       setError(errorMessage);
     }
-  }, [url, tags, onAddBookmark]);
+  }, [url, tags, category, onAddBookmark]);
 
   // URL 입력 시 에러 초기화
   const handleUrlChange = useCallback(
@@ -193,6 +200,21 @@ export const BookmarkForm = ({
               <span>{error}</span>
             </div>
           )}
+        </div>
+        <div className="flex items-center gap-2">
+          <Folder className="h-4 w-4 shrink-0 text-muted-foreground" />
+          <select
+            value={category ?? ''}
+            onChange={(e) => setCategory(e.target.value || null)}
+            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50"
+          >
+            <option value="">카테고리 선택 (선택 사항)</option>
+            {BOOKMARK_CATEGORIES.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
+            ))}
+          </select>
         </div>
         <div className="flex flex-wrap gap-2">
           {tags.map((tag, index) => (
