@@ -11,7 +11,6 @@ import {
   Tag,
   Edit2,
   Trash2,
-  ExternalLink,
   Save,
   Link as LinkIcon,
   Folder,
@@ -118,8 +117,8 @@ export const BookmarkCard = ({
   const mediaBlock = bookmark.embed_html ? (
     <div
       className={cn(
-        'overflow-hidden rounded-lg',
-        isList ? 'w-full sm:w-64 sm:shrink-0' : 'mb-4'
+        'overflow-hidden',
+        isList ? 'w-full sm:w-64 sm:shrink-0' : ''
       )}
       onClick={stop}
       dangerouslySetInnerHTML={{ __html: bookmark.embed_html }}
@@ -127,8 +126,8 @@ export const BookmarkCard = ({
   ) : shouldShowImage ? (
     <div
       className={cn(
-        'relative aspect-video overflow-hidden rounded-lg bg-muted',
-        isList ? 'w-full sm:w-64 sm:shrink-0' : 'mb-4 w-full'
+        'relative aspect-video overflow-hidden bg-muted',
+        isList ? 'w-full sm:w-64 sm:shrink-0' : 'w-full'
       )}
     >
       <Image
@@ -155,8 +154,8 @@ export const BookmarkCard = ({
   ) : shouldShowPlaceholder ? (
     <div
       className={cn(
-        'flex aspect-video items-center justify-center rounded-lg bg-muted p-4',
-        isList ? 'w-full sm:w-64 sm:shrink-0' : 'mb-4 w-full'
+        'flex aspect-video items-center justify-center bg-muted p-4',
+        isList ? 'w-full sm:w-64 sm:shrink-0' : 'w-full'
       )}
     >
       {bookmark.title ? (
@@ -180,20 +179,20 @@ export const BookmarkCard = ({
       onClick={handleCardClick}
       onKeyDown={handleCardKeyDown}
       className={cn(
-        'group relative overflow-hidden transition-all hover:shadow-lg',
+        'group relative overflow-hidden border-2 border-transparent py-0 transition-all hover:border-primary hover:shadow-lg',
         !isEditing &&
           'cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
       )}
     >
       <CardContent
         className={cn(
-          'p-4',
-          isList && 'flex flex-col gap-4 sm:flex-row sm:items-start'
+          'p-0',
+          isList && 'flex flex-col sm:flex-row sm:items-start'
         )}
       >
         {mediaBlock}
 
-        <div className={cn(isList && 'flex-1 min-w-0')}>
+        <div className={cn('p-4', isList && 'flex-1 min-w-0')}>
           {/* 제목 */}
           {(shouldShowImage || bookmark.embed_html) && bookmark.title && (
             <h3
@@ -382,53 +381,39 @@ export const BookmarkCard = ({
           </div>
 
           {/* 액션 버튼 */}
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={(e) => {
-                  stop(e);
-                  if (isEditing) {
-                    handleCancelEdit();
-                  } else {
-                    setEditTags(bookmark.tags);
-                    setEditCategory(bookmark.category);
-                    setIsEditing(true);
-                  }
-                }}
-                aria-label={isEditing ? '편집 취소' : '편집'}
-              >
-                {isEditing ? (
-                  <X className="h-4 w-4" />
-                ) : (
-                  <Edit2 className="h-4 w-4" />
-                )}
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={(e) => {
-                  stop(e);
-                  onDelete(bookmark.id);
-                }}
-                className="text-destructive hover:text-destructive"
-                aria-label="삭제"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
+          <div className="flex items-center gap-2">
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
               onClick={(e) => {
                 stop(e);
-                handleOpenBookmark();
+                if (isEditing) {
+                  handleCancelEdit();
+                } else {
+                  setEditTags(bookmark.tags);
+                  setEditCategory(bookmark.category);
+                  setIsEditing(true);
+                }
               }}
-              className="gap-2"
+              aria-label={isEditing ? '편집 취소' : '편집'}
             >
-              <ExternalLink className="h-4 w-4" />
-              열기
+              {isEditing ? (
+                <X className="h-4 w-4" />
+              ) : (
+                <Edit2 className="h-4 w-4" />
+              )}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => {
+                stop(e);
+                onDelete(bookmark.id);
+              }}
+              className="text-destructive hover:text-destructive"
+              aria-label="삭제"
+            >
+              <Trash2 className="h-4 w-4" />
             </Button>
           </div>
         </div>
