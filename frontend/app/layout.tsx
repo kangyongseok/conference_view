@@ -149,7 +149,15 @@ export default function RootLayout({
         <meta name="format-detection" content="telephone=no" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="google-adsense-account" content="ca-pub-3704514086413798" />
+        <meta
+          name="google-adsense-account"
+          content={process.env.NEXT_GOOGLE_ADSENSE_CLIENT}
+        />
+        <script
+          async
+          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_GOOGLE_ADSENSE_CLIENT}`}
+          crossOrigin="anonymous"
+        ></script>
         <meta
           name="naver-site-verification"
           content="baeb524cf7dbc8ae25b17f9e48b7c24ec171ac3b"
